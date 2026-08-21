@@ -1,0 +1,4 @@
+name,position in array,low,high,step,optguess,minbound,maxbound,derived params
+SpecificLeafAreaFactor,,0.5,1.5,,,,,
+CropSpecificMaxRootingDepth,,0.8,2.5,,,,,
+MaxAssimilationRateFactor,,0.5,1.5,,,,,

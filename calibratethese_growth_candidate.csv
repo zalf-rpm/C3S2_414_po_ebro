@@ -1,0 +1,7 @@
+name,position in array,low,high,step,optguess,minbound,maxbound,derived params
+SpecificLeafAreaFactor,,0.5,1.5,,,,,
+CropSpecificMaxRootingDepth,,0.8,2.0,,,,,
+MaxAssimilationRateFactor,,0.5,1.5,,,,,
+CriticalTemperatureHeatStress,,25,35,,,,,
+DroughtStressThreshold,,0.5,1,,,,,
+StageKcFactor,,0.5,1.5,,,,,

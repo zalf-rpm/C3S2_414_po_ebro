@@ -1,0 +1,3 @@
+name,position in array,low,high,step,optguess,minbound,maxbound,derived params
+StageTemperatureSumFactor,,0.5,1.5,,,,,
+VernalisationRequirementFactor,,0.5,1.5,,,,,
