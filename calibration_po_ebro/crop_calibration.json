@@ -4,7 +4,7 @@
 			"is-winter-crop": true,
 			"cropParams": {
 				"species": ["include-from-file", "crops/wheat.json"],
-				"cultivar": ["include-from-file", "crops/wheat/durum-wheat.json"]
+				"cultivar": ["include-from-file", "crops/wheat/durum-wheat_C3S2_414.json"]
 			},
 			"residueParams": ["include-from-file", "crop-residues/wheat.json"]
 		},
@@ -12,7 +12,7 @@
 			"is-winter-crop": true,
 			"cropParams": {
 				"species": ["include-from-file", "crops/barley.json"],
-				"cultivar": ["include-from-file", "crops/barley/winter-barley.json"]
+				"cultivar": ["include-from-file", "crops/barley/winter-barley_C3S2_414.json"]
 			},
 			"residueParams": ["include-from-file", "crop-residues/barley.json"]
 		}		
@@ -101,7 +101,7 @@
 			}
 		]
 	},
-	"cropRotation": ["ref", "cropRotationTemplates", "WW"],
+	"cropRotation": ["ref", "cropRotationTemplates", "from_sim_setups"],
 	"CropParameters": {
 		"=": ["include-from-file", "general/crop.json"],
 		"__enable_vernalisation_factor_fix__": true
