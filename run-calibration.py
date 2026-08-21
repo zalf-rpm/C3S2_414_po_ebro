@@ -16,8 +16,6 @@ import uuid
 
 import calibration_spotpy_setup_MONICA
 
-parameter_setting_file = "calibratethese_growth_major.csv"
-
 PATH_TO_REPO = Path(os.path.realpath(__file__)).parent
 PATH_TO_MAS_INFRASTRUCTURE_REPO = PATH_TO_REPO / "../mas-infrastructure"
 PATH_TO_PYTHON_CODE = PATH_TO_MAS_INFRASTRUCTURE_REPO / "src/python"
@@ -133,6 +131,7 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
     region = setup["region"]
     crop_id = setup["crop-id"]
     crop_code = crop_id.split("_")[0]
+    parameter_setting_file = setup["parameter-setting-file"]
 
     crop_to_observations = defaultdict(list)
     nuts3_region_id_to_name = {}
