@@ -1,0 +1,5 @@
+run-id,use_vernalisation_fix,sowing-date,harvest-date,crop-id,region,sim.json,crop.json,site.json,start_date,end_date,groundwater-level,elevation,slope,latitude,landcover,fertilization,NitrogenResponseOn,irrigation,WaterDeficitResponseOn,CO2,O3,comment
+1,TRUE,fixed,fixed,DW_sfix_hauto,po_valley,sim_calibration.json,crop_calibration.json,site.json,1/1/2014,12/31/2025,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,,,Durum wheat for Po valley
+2,TRUE,fixed,fixed,WB_sfix_hauto,po_valley,sim_calibration.json,crop_calibration.json,site.json,1/1/2014,12/31/2025,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,,,Winter barley for Po valley
+3,TRUE,fixed,fixed,DW_sfix_hauto,ebro_valley,sim_calibration.json,crop_calibration.json,site.json,1/1/2014,12/31/2025,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,,,Durum wheat for Ebro valley
+4,TRUE,fixed,fixed,WB_sfix_hauto,ebro_valley,sim_calibration.json,crop_calibration.json,site.json,1/1/2014,12/31/2025,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,,,Winter barley for Ebro valley
