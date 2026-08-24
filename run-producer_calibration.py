@@ -183,7 +183,7 @@ def run_producer(server={"server": None, "port": None}):
 
     # soil data
     path_to_soil_grid = paths["path-to-data-dir"] + DATA_GRID_SOIL
-    soil_epsg_code = int(path_to_soil_grid.split("/")[-1].split("_")[2])
+    soil_epsg_code = int(path_to_soil_grid.split("/")[-1].split("_")[3])
     soil_crs = CRS.from_epsg(soil_epsg_code)
     if wgs84_crs not in soil_crs_to_x_transformers:
         soil_crs_to_x_transformers[wgs84_crs] = Transformer.from_crs(soil_crs, wgs84_crs)
@@ -194,7 +194,7 @@ def run_producer(server={"server": None, "port": None}):
 
     # height data
     path_to_dem_grid = paths["path-to-data-dir"] + DATA_GRID_HEIGHT
-    dem_epsg_code = int(path_to_dem_grid.split("/")[-1].split("_")[2])
+    dem_epsg_code = int(path_to_dem_grid.split("/")[-1].split("_")[3])
     dem_crs = CRS.from_epsg(dem_epsg_code)
     if dem_crs not in soil_crs_to_x_transformers:
         soil_crs_to_x_transformers[dem_crs] = Transformer.from_crs(soil_crs, dem_crs)
@@ -206,7 +206,7 @@ def run_producer(server={"server": None, "port": None}):
 
     # slope data
     path_to_slope_grid = paths["path-to-data-dir"] + DATA_GRID_SLOPE
-    slope_epsg_code = int(path_to_slope_grid.split("/")[-1].split("_")[2])
+    slope_epsg_code = int(path_to_slope_grid.split("/")[-1].split("_")[3])
     slope_crs = CRS.from_epsg(slope_epsg_code)
     if slope_crs not in soil_crs_to_x_transformers:
         soil_crs_to_x_transformers[slope_crs] = Transformer.from_crs(soil_crs, slope_crs)
@@ -218,7 +218,7 @@ def run_producer(server={"server": None, "port": None}):
 
     # crop mask data
     path_to_crop_grid = paths["path-to-data-dir"] + DATA_GRID_CROPS
-    crop_epsg_code = int(path_to_crop_grid.split("/")[-1].split("_")[2])
+    crop_epsg_code = int(path_to_crop_grid.split("/")[-1].split("_")[4])
     crop_crs = CRS.from_epsg(crop_epsg_code)
     if crop_crs not in soil_crs_to_x_transformers:
         soil_crs_to_x_transformers[crop_crs] = Transformer.from_crs(soil_crs, crop_crs)
@@ -230,7 +230,7 @@ def run_producer(server={"server": None, "port": None}):
 
     # nuts3_regions
     path_to_nuts3_regions_grid = paths["path-to-data-dir"] + NUTS3_REGIONS_GRID
-    nuts3_regions_epsg_code = int(path_to_nuts3_regions_grid.split("/")[-1].split("_")[2])
+    nuts3_regions_epsg_code = int(path_to_nuts3_regions_grid.split("/")[-1].split("_")[4])
     nuts3_regions_crs = CRS.from_epsg(nuts3_regions_epsg_code)
     if nuts3_regions_crs not in soil_crs_to_x_transformers:
         soil_crs_to_x_transformers[nuts3_regions_crs] = Transformer.from_crs(soil_crs, nuts3_regions_crs)
