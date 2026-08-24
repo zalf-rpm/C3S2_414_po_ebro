@@ -149,12 +149,12 @@ def run_producer(server={"server": None, "port": None}):
     TEMPLATE_PATH_LATLON = f"{region}/{region}_latlon_to_rowcol.json"
 
     # Additional data for masking the regions
-    NUTS3_REGIONS = f"{region}/{region}_nuts3_4326.shp"
+    # NUTS3_REGIONS = f"{region}/{region}_nuts3_4326.shp"
     NUTS3_REGIONS_GRID = f"{region}/{region}_nuts3_regions_4326.asc"
 
     #TEMPLATE_PATH_HARVEST = "{path_to_data_dir}/projects/monica-germany/ILR_SEED_HARVEST_doys_{crop_id}.csv"
 
-    gdf = gpd.read_file(NUTS3_REGIONS)
+    # gdf = gpd.read_file(NUTS3_REGIONS)
 
     # soil_db_path = paths["path-to-data-dir"] + DATA_SOIL_DB
     soil_db_path = DATA_SOIL_DB
