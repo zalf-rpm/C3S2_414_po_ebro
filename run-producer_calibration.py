@@ -156,8 +156,7 @@ def run_producer(server={"server": None, "port": None}):
 
     # gdf = gpd.read_file(NUTS3_REGIONS)
 
-    # soil_db_path = paths["path-to-data-dir"] + DATA_SOIL_DB
-    soil_db_path = DATA_SOIL_DB
+    soil_db_path = paths["path-to-data-dir"] + DATA_SOIL_DB
     # subprocess.run(["wget", "-O", soil_db_path, SOIL_DB_URL], check=True)
     #print("Downloaded soil db successfully.")
 
