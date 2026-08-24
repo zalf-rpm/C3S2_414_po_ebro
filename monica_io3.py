@@ -518,7 +518,7 @@ def supported_patterns():
         "convert humus level to corg"
         if len(j__) == 2 \
             and isinstance(j__[1], int):
-            return {"result": cz_soil_io3.humus_class_to_corg(j__[1]), "errors": [], "success": True}
+            return {"result": soil_io3.humus_class_to_corg(j__[1]), "errors": [], "success": True}
         return {"result": j__,
                 "errors": ["Couldn't convert humus level to corg: " + json.dumps(j__) + "!"],
                 "success": False}
@@ -527,21 +527,21 @@ def supported_patterns():
         if len(j__) == 3 \
             and isinstance(j__[1], int) \
             and isinstance(j__[2], float):
-            return {"result": cz_soil_io3.bulk_density_class_to_raw_density(j__[1], j__[2]), "errors": [], "success": True}
+            return {"result":soil_io3.bulk_density_class_to_raw_density(j__[1], j__[2]), "errors": [], "success": True}
         return {"result": j__,
                 "errors": ["Couldn't convert bulk density class to raw density using function: " + json.dumps(j__) + "!"],
                 "success": False}
 
     def ka5_to_clay(_, j__):
         if len(j__) == 2 and is_string_type(j__[1]):
-            return {"result": cz_soil_io3.ka5_texture_to_clay(j__[1]), "errors": [], "success": True}
+            return {"result": soil_io3.ka5_texture_to_clay(j__[1]), "errors": [], "success": True}
         return {"result": j__,
                 "errors": ["Couldn't get soil clay content from KA5 soil class: " + json.dumps(j__) + "!"],
                 "success": False}
 
     def ka5_to_sand(_, j__):
         if len(j__) == 2 and is_string_type(j__[1]):
-            return {"result": cz_soil_io3.ka5_texture_to_sand(j__[1]), "errors": [], "success": True}
+            return {"result": soil_io3.ka5_texture_to_sand(j__[1]), "errors": [], "success": True}
         return {"result": j__,
                 "errors": ["Couldn't get soil sand content from KA5 soil class: " + json.dumps(j__) + "!"],
                 "success": False}
@@ -550,7 +550,7 @@ def supported_patterns():
         if len(j__) == 3 \
             and isinstance(j__[1], float) \
             and isinstance(j__[2], float):
-            return {"result": cz_soil_io3.sand_and_clay_to_lambda(j__[1], j__[2]), "errors": [], "success": True}
+            return {"result": soil_io3.sand_and_clay_to_lambda(j__[1], j__[2]), "errors": [], "success": True}
         return {"result": j__,
                 "errors": ["Couldn't get lambda value from soil sand and clay content: " + json.dumps(j__) + "!"],
                 "success": False}
