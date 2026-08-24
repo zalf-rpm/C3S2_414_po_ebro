@@ -138,6 +138,12 @@ def run_producer(server={"server": None, "port": None}):
     crop_id = setup["crop-id"]
     crop_code = crop_id.split("_")[0]
 
+    crop_grid_codes = {
+        "DW": "dw",
+        "WB": "ba"
+    }
+    crop_grid_code = crop_grid_codes[crop_code]
+
      # select paths
     paths = PATHS[config["mode"]]
 
@@ -145,7 +151,7 @@ def run_producer(server={"server": None, "port": None}):
     DATA_GRID_HEIGHT = f"{region}/{region}_dem_4326.asc"
     DATA_GRID_SLOPE = f"{region}/{region}_slope_4326.asc"
     DATA_GRID_SOIL = f"{region}/{region}_soil_4326.asc"
-    DATA_GRID_CROPS = f"{region}/{region}_crop_{crop_code}_4326.asc" ## Define per crop ##
+    DATA_GRID_CROPS = f"{region}/{region}_crop_{crop_grid_code}_4326.asc" ## Define per crop ##
     TEMPLATE_PATH_LATLON = f"{region}/{region}_latlon_to_rowcol.json"
 
     # Additional data for masking the regions
