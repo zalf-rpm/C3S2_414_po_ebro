@@ -445,9 +445,9 @@ def run_producer(server={"server": None, "port": None}):
 
                 scols = int(soil_metadata["ncols"])
                 srows = int(soil_metadata["nrows"])
-                scellsize = int(soil_metadata["cellsize"])
-                xllcorner = int(soil_metadata["xllcorner"])
-                yllcorner = int(soil_metadata["yllcorner"])
+                scellsize = float(soil_metadata["cellsize"])
+                xllcorner = float(soil_metadata["xllcorner"])
+                yllcorner = float(soil_metadata["yllcorner"])
                 nodata_value = int(soil_metadata["nodata_value"])
 
                 # unknown_soil_ids = set()

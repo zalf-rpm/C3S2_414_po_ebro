@@ -89,13 +89,13 @@ def create_ascii_grid_interpolator(grid, meta_data, ignore_nodata=True):
 
     rows, cols = grid.shape
 
-    cellsize = int(meta_data["cellsize"])
-    xll = int(meta_data["xllcorner"])
-    yll = int(meta_data["yllcorner"])
+    cellsize = float(meta_data["cellsize"])
+    xll = float(meta_data["xllcorner"])
+    yll = float(meta_data["yllcorner"])
     nodata_value = meta_data["nodata_value"]
 
-    xll_center = xll + cellsize // 2
-    yll_center = yll + cellsize // 2
+    xll_center = xll + cellsize / 2.0
+    yll_center = yll + cellsize / 2.0
     yul_center = yll_center + (rows - 1)*cellsize
 
     points = []
