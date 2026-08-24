@@ -149,7 +149,8 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
             name = row[0].strip()
             nuts3_region_id_to_name[id] = name
             for i, year in enumerate(years, start=1):
-                yield_t = float(row[i])
+                yield_text = row[i].strip()
+                yield_t = np.nan if not yield_text or yield_text.upper() == "NA" else float(yield_text)
                 crop_to_observations[crop_code].append({ # Define per crop #
                     "id": id,
                     "year": year,
