@@ -17,7 +17,7 @@ import time
 import json
 import sys
 
-import cz_soil_io3
+import soil_io3
 #import monica_python
 #print("path to monica_python: ", monica_python.__file__)
 
