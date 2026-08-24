@@ -141,16 +141,16 @@ def run_producer(server={"server": None, "port": None}):
      # select paths
     paths = PATHS[config["mode"]]
 
-    DATA_SOIL_DB = f"data/{region}/{region}_soil.sqlite"
-    DATA_GRID_HEIGHT = f"data/{region}/{region}_dem_4326.asc"
-    DATA_GRID_SLOPE = f"data/{region}/{region}_slope_4326.asc"
-    DATA_GRID_SOIL = f"data/{region}/{region}_soil_4326.asc"
-    DATA_GRID_CROPS = f"data/{region}/{region}_crop_{crop_code}_4326.asc" ## Define per crop ##
-    TEMPLATE_PATH_LATLON = f"data/{region}/{region}_latlon_to_rowcol.json"
+    DATA_SOIL_DB = f"{region}/{region}_soil.sqlite"
+    DATA_GRID_HEIGHT = f"{region}/{region}_dem_4326.asc"
+    DATA_GRID_SLOPE = f"{region}/{region}_slope_4326.asc"
+    DATA_GRID_SOIL = f"{region}/{region}_soil_4326.asc"
+    DATA_GRID_CROPS = f"{region}/{region}_crop_{crop_code}_4326.asc" ## Define per crop ##
+    TEMPLATE_PATH_LATLON = f"{region}/{region}_latlon_to_rowcol.json"
 
     # Additional data for masking the regions
-    NUTS3_REGIONS = f"data/{region}/{region}_nuts3_4326.shp"
-    NUTS3_REGIONS_GRID = f"data/{region}/{region}_nuts3_regions_4326.asc"
+    NUTS3_REGIONS = f"{region}/{region}_nuts3_4326.shp"
+    NUTS3_REGIONS_GRID = f"{region}/{region}_nuts3_regions_4326.asc"
 
     #TEMPLATE_PATH_HARVEST = "{path_to_data_dir}/projects/monica-germany/ILR_SEED_HARVEST_doys_{crop_id}.csv"
 
