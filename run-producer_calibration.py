@@ -495,6 +495,16 @@ def run_producer(server={"server": None, "port": None}):
                             soil_profile = soil_id_cache[soil_id]
                         else:
                             soil_profile = soil_io3.soil_parameters(soil_db_con, soil_id)
+
+                        fraction_parameters = ("Sand", "Clay", "Sceleton")
+
+                        for layer in soil_profile:
+                            for parameter in fraction_parameters:
+                                value = layer.get(parameter)
+
+                                if (isinstance(value, list) and value and float(value[0]) > 1.0):
+                                    value[0] = float(value[0]) / 100.0
+
                             soil_id_cache[soil_id] = soil_profile
                         if not soil_profile or len(soil_profile) == 0:
                             continue
