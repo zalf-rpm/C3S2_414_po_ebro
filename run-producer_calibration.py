@@ -624,10 +624,10 @@ def run_producer(server={"server": None, "port": None}):
                         env_template["params"]["siteParameters"]["SoilProfileParameters"] = soil_profile
 
                         if setup["elevation"]:
-                            env_template["params"]["siteParameters"]["heightNN"] = float(height_nn)
+                            env_template["params"]["siteParameters"]["HeightNN"] = float(height_nn)
 
                         if setup["slope"]:
-                            env_template["params"]["siteParameters"]["slope"] = slope / 100.0
+                            env_template["params"]["siteParameters"]["Slope"] = slope / 100.0
 
                         if setup["latitude"]:
                             clat, _ = cdict[(crow, ccol)]
