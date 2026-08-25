@@ -96,9 +96,9 @@ def run_consumer(server=None, port=None):
                 #     _.write(f"received result customId: {custom_id}\nresult: {msg.get('data',[])}")
                 # print("received result customId:", custom_id)
 
-                with open(path_to_out_file, "a") as _:
-                    _.write(f"received result customId: {custom_id}\nerrors: {msg.get('errors','no errors')} result: {msg.get('data',[])}\n")
-                print("received result customId:", custom_id)
+                # with open(path_to_out_file, "a") as _:
+                #     _.write(f"received result customId: {custom_id}\nerrors: {msg.get('errors','no errors')} result: {msg.get('data',[])}\n")
+                # print("received result customId:", custom_id)
 
                 nuts3_region_id = custom_id["nuts3_region_id"]
 
