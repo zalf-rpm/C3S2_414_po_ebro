@@ -1,10 +1,10 @@
 <PAMDataset>
   <PAMRasterBand band="1">
-    <Description>spat_6ff415024a50_28660_80Q6udnsxVen2Mq</Description>
+    <Description>spat_32f85ac3f23_13048_80Q6udnsxVen2Mq</Description>
     <Metadata>
-      <MDI key="STATISTICS_MAXIMUM">62.246353149414</MDI>
+      <MDI key="STATISTICS_MAXIMUM">2422.4594726563</MDI>
       <MDI key="STATISTICS_MEAN">-9999</MDI>
-      <MDI key="STATISTICS_MINIMUM">0.00720653263852</MDI>
+      <MDI key="STATISTICS_MINIMUM">-3.5194416046143</MDI>
       <MDI key="STATISTICS_STDDEV">-9999</MDI>
     </Metadata>
   </PAMRasterBand>
