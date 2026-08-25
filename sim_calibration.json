@@ -10,7 +10,7 @@
 	
 	"debug?": false,
 	"path-to-output": "./",
-	"include-file-base-path": "data/monica-parameters/",
+	"include-file-base-path": "monica-parameters/",
 
 	"output": { 
 	  	"write-file?": false,
