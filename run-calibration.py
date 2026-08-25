@@ -225,9 +225,21 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         #print("selected weight for region:", weights[current_only_nuts3_region_ids[0]], flush=True)
         #spot_setup = calibration_spotpy_setup_MONICA.spot_setup(params, filtered_observations, prod_writer, cons_reader,
                                                                 #path_to_out_folder, current_only_nuts3_region_ids)
-        
+
+        # Assign each observation its region-specific weight. An empty region filter selects all regions.
+        missing_weight_ids = sorted({observation["id"] for observation in filtered_observations if observation ["id"]
+                                     not in weights})
+        if missing_weight_ids:
+            raise ValueError(f"Missing weights for NUTS3 regions: {missing_weight_ids}")
+
+        weights_per_observation = np.array([weights[observation["id"]] for observation in filtered_observations])
+
         spot_setup = calibration_spotpy_setup_MONICA.spot_setup(params, filtered_observations, prod_writer, cons_reader,
-                                                        path_to_out_folder, current_only_nuts3_region_ids, weights[current_only_nuts3_region_ids[0]])
+                                                                path_to_out_folder, current_only_nuts3_region_ids,
+                                                                weights_per_observation)
+
+        # spot_setup = calibration_spotpy_setup_MONICA.spot_setup(params, filtered_observations, prod_writer, cons_reader,
+        #                                                 path_to_out_folder, current_only_nuts3_region_ids, weights[current_only_nuts3_region_ids[0]])
 
         rep = int(config["repetitions"]) #initial number was 10
         results = []
