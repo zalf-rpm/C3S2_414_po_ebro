@@ -365,6 +365,10 @@ def run_producer(server={"server": None, "port": None}):
                     if real_crop_id:
                         ps = crop_json["crops"][real_crop_id]["cropParams"]
                         for sampled_name, sampled_value in params.items():
+                            with open(path_to_out_file, "a") as _:
+                                _.write(
+                                    f"PARAM RECEIVED: {sampled_name} = {sampled_value}\n"
+                                )
                             # separate array index
                             parts = sampled_name.rsplit("_", 1)
                             if len(parts) == 2 and parts[1].isdigit():
@@ -378,12 +382,22 @@ def run_producer(server={"server": None, "port": None}):
                             is_factor = base_name.endswith("Factor")
                             pname = base_name.removesuffix("Factor")
 
+                            # for debugging
+                            with open(path_to_out_file, "a") as _:
+                                _.write(
+                                    f"  parsed: base_name={base_name}, "
+                                    f"pname={pname}, "
+                                    f"position={position_in_array}, "
+                                    f"is_factor={is_factor}\n"
+                                )
                             # parameter group (species, cultivar)
                             if pname in ps["species"]:
                                 ptype = "species"
                             elif pname in ps["cultivar"]:
                                 ptype = "cultivar"
                             else:
+                                with open(path_to_out_file, "a") as _:
+                                    _.write(f"  NOT FOUND: {pname}\n")
                                 continue
 
                             # for debugging
