@@ -23,7 +23,7 @@
 				"worksteps": [
 					{
 						"date": "0000-10-01",
-						"type": "AutomaticSowing",
+						"type": "Sowing",
 						"crop": ["ref", "crops", "DW"]
 					},
 					{
