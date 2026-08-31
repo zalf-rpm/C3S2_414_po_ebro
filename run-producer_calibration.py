@@ -351,118 +351,11 @@ def run_producer(server={"server": None, "port": None}):
                 with open(path_to_out_file, "a") as _:
                     _.write(f"{datetime.now()} read site and sim json producer\n\n")
 
-                #site_json["EnvironmentParameters"]["rcp"] = scenario
-
                 # read template crop.json
                 with open(setup.get("crop.json", config["crop.json"])) as _:
                     crop_json = json.load(_)
                     crop_json["cropRotation"][2] = crop_id
-                    real_crop_id = None
-                    # set value of calibration params
-                    for ws in crop_json["cropRotationTemplates"][crop_id][0]["worksteps"]:
-                        if "Sowing" in ws["type"]:
-                            real_crop_id = ws["crop"][2]
-                    if real_crop_id:
-                        ps = crop_json["crops"][real_crop_id]["cropParams"]
-                        for sampled_name, sampled_value in params.items():
-                            with open(path_to_out_file, "a") as _:
-                                _.write(
-                                    f"PARAM RECEIVED: {sampled_name} = {sampled_value}\n"
-                                )
-                            # separate array index
-                            parts = sampled_name.rsplit("_", 1)
-                            if len(parts) == 2 and parts[1].isdigit():
-                                base_name = parts[0]
-                                position_in_array = int(parts[1])
-                            else:
-                                base_name = sampled_name
-                                position_in_array = None
-                            
-                            # check whether sampled value is a scaling factor
-                            is_factor = base_name.endswith("Factor")
-                            pname = base_name.removesuffix("Factor")
-
-                            # for debugging
-                            with open(path_to_out_file, "a") as _:
-                                _.write(
-                                    f"  parsed: base_name={base_name}, "
-                                    f"pname={pname}, "
-                                    f"position={position_in_array}, "
-                                    f"is_factor={is_factor}\n"
-                                )
-                            # parameter group (species, cultivar)
-                            if pname in ps["species"]:
-                                ptype = "species"
-                            elif pname in ps["cultivar"]:
-                                ptype = "cultivar"
-                            else:
-                                with open(path_to_out_file, "a") as _:
-                                    _.write(f"  NOT FOUND: {pname}\n")
-                                continue
-
-                            # for debugging
-                            old_value = (
-                                ps[ptype][pname].copy()
-                                if isinstance(ps[ptype][pname], list)
-                                else ps[ptype][pname]
-                            )
-
-                            # explicitly specificed position in array
-                            if position_in_array is not None:
-                                if is_factor:
-                                    ps[ptype][pname][position_in_array] *= sampled_value
-                                else:
-                                    ps[ptype][pname][position_in_array] = sampled_value
-                            else:
-
-                                # default target positions
-                                indices = None
-                                if pname == "StageTemperatureSum":
-                                    indices = range(0,6)
-                                elif pname == "VernalisationRequirement":
-                                    indices = range(0,6)
-                                elif pname == "BaseDaylength":
-                                    indices = range(2,4)
-                                elif pname == "DaylengthRequirement":
-                                    indices = range(1,4)
-                                elif pname == "SpecificLeafArea":
-                                    indices = range(0,6)
-
-                                # apply sampled value
-                                if indices is not None:
-                                    for index in indices:
-                                        if is_factor:
-                                            ps[ptype][pname][index] *= sampled_value
-                                        else:
-                                            ps[ptype][pname][index] = sampled_value
-                                else:
-                                    if is_factor:
-                                        ps[ptype][pname] *= sampled_value
-                                    else:
-                                        ps[ptype][pname] = sampled_value
-
-                                # additional parameter changes
-                                if pname == "StageTemperatureSum" and is_factor:
-                                    ps["cultivar"]["BeginSensitivePhaseHeatStress"] *= sampled_value
-                                    ps["cultivar"]["EndSensitivePhaseHeatStress"] *= sampled_value
-
-                            # for debugging
-                            with open(path_to_out_file, "a") as _:
-                                _.write(
-                                    f"{sampled_name} ({ptype}.{pname}): "
-                                    f"sampled={sampled_value}, "
-                                    f"before={old_value}, "
-                                    f"after={ps[ptype][pname]}\n"
-                                )                            
-
-                    else:
-                        with open(path_to_out_file, "a") as _:
-                            _.write(
-                                f"{datetime.now()} Error couldn't find sowing workstep in crop.json\n"
-                            )
-                        exit(1)
-
-                crop_json["CropParameters"]["__enable_vernalisation_factor_fix__"] = setup[
+                    crop_json["CropParameters"]["__enable_vernalisation_factor_fix__"] = setup[
                     "use_vernalisation_fix"] if "use_vernalisation_fix" in setup else False
 
                 # create environment template from json templates
@@ -472,6 +365,107 @@ def run_producer(server={"server": None, "port": None}):
                     "sim": sim_json,
                     "climate": ""
                 })
+
+                # for debugging
+                ps = None
+                for ws in env_template["cropRotation"][0]["worksteps"]:
+                    if "Sowing" in ws["type"]:
+                        ps = ws["crop"]["cropParams"]
+                        with open(path_to_out_file, "a") as _:
+                            _.write(f"species type: {type(ps['species'])}\n")
+                            _.write(f"species keys: {list(ps['species'].keys())}\n")
+                            _.write(f"cultivar type: {type(ps['cultivar'])}\n")
+                            _.write(f"cultivar keys: {list(ps['cultivar'].keys())}\n")
+                        break
+
+                if ps is None:
+                    with open(path_to_out_file, "a") as _:
+                        _.write(f"{datetime.now()} No sowing found in crop.json producer\n\n")
+                    continue
+
+                for sampled_name, sampled_value in params.items():
+                    # separate array index
+                    parts = sampled_name.rsplit("_", 1)
+                    if len(parts) == 2 and parts[1].isdigit():
+                        base_name = parts[0]
+                        position_in_array = int(parts[1])
+                    else:
+                        base_name = sampled_name
+                        position_in_array = None
+                    
+                    # check whether sampled value is a scaling factor
+                    is_factor = base_name.endswith("Factor")
+                    pname = base_name.removesuffix("Factor")
+
+                    # for debugging
+                    with open(path_to_out_file, "a") as _:
+                        _.write(
+                            f"{datetime.now()} {sampled_name}, "
+                            f"{pname}, "
+                            f"{position_in_array}, "
+                            f"{is_factor}\n"
+                        )
+
+                    # parameter group (species, cultivar)
+                    if pname in ps["species"]:
+                        ptype = "species"
+                    elif pname in ps["cultivar"]:
+                        ptype = "cultivar"
+                    else:
+                        with open(path_to_out_file, "a") as _:
+                            _.write(f"{datetime.now()} {sampled_name} not found producer\n\n")
+                        continue
+
+                    # for debugging
+                    old_value = (ps[ptype][pname].copy() if isinstance(ps[ptype][pname], list) else ps[ptype][pname])
+
+                    # explicitly specificed position in array
+                    if position_in_array is not None:
+                        if is_factor:
+                            ps[ptype][pname][position_in_array] *= sampled_value
+                        else:
+                            ps[ptype][pname][position_in_array] = sampled_value
+                    else:
+
+                        # default target positions
+                        indices = None
+                        if pname == "StageTemperatureSum":
+                            indices = range(0,6)
+                        elif pname == "VernalisationRequirement":
+                            indices = range(0,6)
+                        elif pname == "BaseDaylength":
+                            indices = range(2,4)
+                        elif pname == "DaylengthRequirement":
+                            indices = range(1,4)
+                        elif pname == "SpecificLeafArea":
+                            indices = range(0,6)
+
+                        # apply sampled value
+                        if indices is not None:
+                            for index in indices:
+                                if is_factor:
+                                    ps[ptype][pname][index] *= sampled_value
+                                else:
+                                    ps[ptype][pname][index] = sampled_value
+                        else:
+                            if is_factor:
+                                ps[ptype][pname] *= sampled_value
+                            else:
+                                ps[ptype][pname] = sampled_value
+
+                        # additional parameter changes
+                        if pname == "StageTemperatureSum" and is_factor:
+                            ps["cultivar"]["BeginSensitivePhaseHeatStress"] *= sampled_value
+                            ps["cultivar"]["EndSensitivePhaseHeatStress"] *= sampled_value
+
+                    # debug output
+                    with open(path_to_out_file, "a") as _:
+                        _.write(
+                            f"{sampled_name} ({ptype}.{pname}): "
+                            f"sampled={sampled_value}, "
+                            f"before={old_value}, "
+                            f"after={ps[ptype][pname]}\n"
+                        )
 
                 scols = int(soil_metadata["ncols"])
                 srows = int(soil_metadata["nrows"])
