@@ -386,47 +386,60 @@ def run_producer(server={"server": None, "port": None}):
                             else:
                                 continue
 
+                            # for debugging
+                            old_value = (
+                                ps[ptype][pname].copy()
+                                if isinstance(ps[ptype][pname], list)
+                                else ps[ptype][pname]
+                            )
+
                             # explicitly specificed position in array
                             if position_in_array is not None:
                                 if is_factor:
                                     ps[ptype][pname][position_in_array] *= sampled_value
                                 else:
                                     ps[ptype][pname][position_in_array] = sampled_value
-                                continue
-
-                            # default target positions
-                            indices = None
-                            if pname == "StageTemperatureSum":
-                                indices = range(0,6)
-                            elif pname == "VernalisationRequirement":
-                                indices = range(0,6)
-                            elif pname == "BaseDaylength":
-                                indices = range(2,4)
-                            elif pname == "DaylengthRequirement":
-                                indices = range(1,4)
-                            elif pname == "SpecificLeafArea":
-                                indices = range(0,6)
-
-                            # apply sampled value
-                            if indices is not None:
-                                for index in indices:
-                                    if is_factor:
-                                        ps[ptype][pname][index] *= sampled_value
-                                    else:
-                                        ps[ptype][pname][index] = sampled_value
                             else:
-                                if is_factor:
-                                    ps[ptype][pname] *= sampled_value
+
+                                # default target positions
+                                indices = None
+                                if pname == "StageTemperatureSum":
+                                    indices = range(0,6)
+                                elif pname == "VernalisationRequirement":
+                                    indices = range(0,6)
+                                elif pname == "BaseDaylength":
+                                    indices = range(2,4)
+                                elif pname == "DaylengthRequirement":
+                                    indices = range(1,4)
+                                elif pname == "SpecificLeafArea":
+                                    indices = range(0,6)
+
+                                # apply sampled value
+                                if indices is not None:
+                                    for index in indices:
+                                        if is_factor:
+                                            ps[ptype][pname][index] *= sampled_value
+                                        else:
+                                            ps[ptype][pname][index] = sampled_value
                                 else:
-                                    ps[ptype][pname] = sampled_value
+                                    if is_factor:
+                                        ps[ptype][pname] *= sampled_value
+                                    else:
+                                        ps[ptype][pname] = sampled_value
 
-                            # additional parameter changes
-                            if pname == "StageTemperatureSum" and is_factor:
-                                ps["cultivar"]["BeginSensitivePhaseHeatStress"] *= sampled_value
-                                ps["cultivar"]["EndSensitivePhaseHeatStress"] *= sampled_value
+                                # additional parameter changes
+                                if pname == "StageTemperatureSum" and is_factor:
+                                    ps["cultivar"]["BeginSensitivePhaseHeatStress"] *= sampled_value
+                                    ps["cultivar"]["EndSensitivePhaseHeatStress"] *= sampled_value
 
+                            # for debugging
                             with open(path_to_out_file, "a") as _:
-                                _.write(f"{sampled_name} ({pname}): {sampled_value}, {ps[ptype][pname]}\n")
+                                _.write(
+                                    f"{sampled_name} ({ptype}.{pname}): "
+                                    f"sampled={sampled_value}, "
+                                    f"before={old_value}, "
+                                    f"after={ps[ptype][pname]}\n"
+                                )                            
 
                     else:
                         with open(path_to_out_file, "a") as _:
