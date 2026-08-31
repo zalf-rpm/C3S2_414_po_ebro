@@ -297,13 +297,6 @@ def run_producer(server={"server": None, "port": None}):
 
                 start_setup_time = time.perf_counter()
 
-                #setup = setups[setup_id]
-                #crop_id = setup["crop-id"]
-                #region_name = setup["region_name"]
-
-                ## extract crop_id from crop-id name that has possible an extension
-                crop_id_short = crop_id.split('_')[0]
-
                 #with open(config["path_to_out"] + "/spot_setup.out", "a") as _:
                 #    _.write(f"{datetime.now()} setup started producer\n") 
 
@@ -419,14 +412,21 @@ def run_producer(server={"server": None, "port": None}):
                     # for debugging
                     old_value = (ps[ptype][pname].copy() if isinstance(ps[ptype][pname], list) else ps[ptype][pname])
 
+                    # check if the parameter is [data, unit] or [data]
+                    param_all = ps[ptype][pname]
+                    has_unit = (isinstance(param_all, list) and len(param_all) == 2 and isinstance(param_all[1], str))
+                    if has_unit:
+                        param_val = param_all[0]
+                    else:
+                        param_val = param_all
+
                     # explicitly specificed position in array
                     if position_in_array is not None:
                         if is_factor:
-                            ps[ptype][pname][position_in_array] *= sampled_value
+                            param_val[position_in_array] *= sampled_value
                         else:
-                            ps[ptype][pname][position_in_array] = sampled_value
+                            param_val[position_in_array] = sampled_value
                     else:
-
                         # default target positions
                         indices = None
                         if pname == "StageTemperatureSum":
@@ -440,23 +440,29 @@ def run_producer(server={"server": None, "port": None}):
                         elif pname == "SpecificLeafArea":
                             indices = range(0,6)
 
-                        # apply sampled value
+                        # check if the parameter is an array
                         if indices is not None:
                             for index in indices:
                                 if is_factor:
-                                    ps[ptype][pname][index] *= sampled_value
+                                    param_val[index] *= sampled_value
                                 else:
-                                    ps[ptype][pname][index] = sampled_value
+                                    param_val[index] = sampled_value
                         else:
                             if is_factor:
-                                ps[ptype][pname] *= sampled_value
+                                param_val *= sampled_value
                             else:
-                                ps[ptype][pname] = sampled_value
+                                param_val = sampled_value
+
+                            # param_val is a scalar copy, so assign it back to the original parameter structure
+                            if has_unit:
+                                ps[ptype][pname][0] = param_val
+                            else:
+                                ps[ptype][pname] = param_val
 
                         # additional parameter changes
                         if pname == "StageTemperatureSum" and is_factor:
-                            ps["cultivar"]["BeginSensitivePhaseHeatStress"] *= sampled_value
-                            ps["cultivar"]["EndSensitivePhaseHeatStress"] *= sampled_value
+                            ps["cultivar"]["BeginSensitivePhaseHeatStress"][0] *= sampled_value
+                            ps["cultivar"]["EndSensitivePhaseHeatStress"][0] *= sampled_value
 
                     # debug output
                     with open(path_to_out_file, "a") as _:
