@@ -425,6 +425,9 @@ def run_producer(server={"server": None, "port": None}):
                                 ps["cultivar"]["BeginSensitivePhaseHeatStress"] *= sampled_value
                                 ps["cultivar"]["EndSensitivePhaseHeatStress"] *= sampled_value
 
+                            with open(path_to_out_file, "a") as _:
+                                _.write(f"{sampled_name} ({pname}): {sampled_value}, {ps[ptype][pname]}\n")
+
                     else:
                         with open(path_to_out_file, "a") as _:
                             _.write(
