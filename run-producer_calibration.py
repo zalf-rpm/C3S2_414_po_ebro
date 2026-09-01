@@ -359,22 +359,12 @@ def run_producer(server={"server": None, "port": None}):
                     "climate": ""
                 })
 
-                # for debugging
+                # get crop params
                 ps = None
                 for ws in env_template["cropRotation"][0]["worksteps"]:
                     if "Sowing" in ws["type"]:
                         ps = ws["crop"]["cropParams"]
-                        with open(path_to_out_file, "a") as _:
-                            _.write(f"species type: {type(ps['species'])}\n")
-                            _.write(f"species keys: {list(ps['species'].keys())}\n")
-                            _.write(f"cultivar type: {type(ps['cultivar'])}\n")
-                            _.write(f"cultivar keys: {list(ps['cultivar'].keys())}\n")
                         break
-
-                if ps is None:
-                    with open(path_to_out_file, "a") as _:
-                        _.write(f"{datetime.now()} No sowing found in crop.json producer\n\n")
-                    continue
 
                 for sampled_name, sampled_value in params.items():
                     # separate array index
@@ -390,27 +380,16 @@ def run_producer(server={"server": None, "port": None}):
                     is_factor = base_name.endswith("Factor")
                     pname = base_name.removesuffix("Factor")
 
-                    # for debugging
-                    with open(path_to_out_file, "a") as _:
-                        _.write(
-                            f"{datetime.now()} {sampled_name}, "
-                            f"{pname}, "
-                            f"{position_in_array}, "
-                            f"{is_factor}\n"
-                        )
-
                     # parameter group (species, cultivar)
                     if pname in ps["species"]:
                         ptype = "species"
                     elif pname in ps["cultivar"]:
                         ptype = "cultivar"
                     else:
-                        with open(path_to_out_file, "a") as _:
-                            _.write(f"{datetime.now()} {sampled_name} not found producer\n\n")
                         continue
 
                     # for debugging
-                    old_value = (ps[ptype][pname].copy() if isinstance(ps[ptype][pname], list) else ps[ptype][pname])
+                    # old_value = (ps[ptype][pname].copy() if isinstance(ps[ptype][pname], list) else ps[ptype][pname])
 
                     # check if the parameter is [data, unit] or [data]
                     param_all = ps[ptype][pname]
@@ -464,14 +443,14 @@ def run_producer(server={"server": None, "port": None}):
                             ps["cultivar"]["BeginSensitivePhaseHeatStress"][0] *= sampled_value
                             ps["cultivar"]["EndSensitivePhaseHeatStress"][0] *= sampled_value
 
-                    # debug output
-                    with open(path_to_out_file, "a") as _:
-                        _.write(
-                            f"{sampled_name} ({ptype}.{pname}): "
-                            f"sampled={sampled_value}, "
-                            f"before={old_value}, "
-                            f"after={ps[ptype][pname]}\n"
-                        )
+                    # for debugging
+                    # with open(path_to_out_file, "a") as _:
+                    #     _.write(
+                    #         f"{sampled_name} ({ptype}.{pname}): "
+                    #         f"sampled={sampled_value}, "
+                    #         f"before={old_value}, "
+                    #         f"after={ps[ptype][pname]}\n"
+                    #     )
 
                 scols = int(soil_metadata["ncols"])
                 srows = int(soil_metadata["nrows"])

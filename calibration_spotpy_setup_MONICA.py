@@ -104,9 +104,9 @@ class spot_setup(object):
         #    _.write(f"{datetime.now()} simulation and observation matchedcal-sp-set-M\n\n")
 
         print("len(sim_list):", len(sim_list), "== len(self.obs_list):", len(self.obs_flat_list), flush=True)
-        with open(self.path_to_out_file, "a") as _:
+        #with open(self.path_to_out_file, "a") as _:
             #_.write(f"received monica results: {country_id_and_year_to_avg_yield}\n")
-            _.write(f"{datetime.now()}  len(sim_list): {len(sim_list)} == len(self.obs_list): {len(self.obs_flat_list)}\n")
+            #_.write(f"{datetime.now()}  len(sim_list): {len(sim_list)} == len(self.obs_list): {len(self.obs_flat_list)}\n")
             #_.write(f"sim_list: {sim_list}\n")
             #_.write(f"obs_list: {self.obs_flat_list}\n")
         # besides the order the length of observation results and simulation results should be the same
