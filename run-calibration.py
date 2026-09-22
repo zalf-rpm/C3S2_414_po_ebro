@@ -135,7 +135,7 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
 
     crop_to_observations = defaultdict(list)
     nuts3_region_id_to_name = {}
-    with (open(f"data/{region}/calibration_{region}_{crop_code}.csv") as file): # Define per crop #
+    with (open(f"data/{region}/{region}_{crop_code}_yield.csv") as file): # Define per crop #
         dialect = csv.Sniffer().sniff(file.read(), delimiters=';,\t')
         file.seek(0)
         reader = csv.reader(file, dialect)
