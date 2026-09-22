@@ -136,7 +136,7 @@ def run_producer(server={"server": None, "port": None}):
 
     region = setup["region"]
     crop_id = setup["crop-id"]
-    crop_code = crop_id.split("_")[0]
+    crop_code = crop_id
 
     crop_grid_codes = {
         "DW": "dw",
@@ -641,12 +641,8 @@ def run_producer(server={"server": None, "port": None}):
                         #     "LeafExtensionModifier"]
 
                         env_template["params"]["siteParameters"]["SoilProfileParameters"] = soil_profile
-
-                        if setup["elevation"]:
-                            env_template["params"]["siteParameters"]["HeightNN"] = float(height_nn)
-
-                        if setup["slope"]:
-                            env_template["params"]["siteParameters"]["Slope"] = slope / 100.0
+                        env_template["params"]["siteParameters"]["HeightNN"] = float(height_nn)
+                        env_template["params"]["siteParameters"]["Slope"] = slope / 100.0
 
                         if setup["latitude"]:
                             clat, _ = cdict[(crow, ccol)]
