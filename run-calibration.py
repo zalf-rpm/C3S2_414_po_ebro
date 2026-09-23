@@ -236,6 +236,7 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         start_time = time.time()
 
         nuts3_region_folder_name = "-".join(map(str, current_only_nuts3_region_ids))
+        run_name = f"setup{setup_id}"
         filtered_observations = observations
         if len(current_only_nuts3_region_ids) > 0:
             filtered_observations = list(filter(lambda d: d["id"] in current_only_nuts3_region_ids, observations))
@@ -265,8 +266,8 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         rep = int(config["repetitions"]) #initial number was 10
         results = []
         #Set up the sampler with the model above
-        sampler = spotpy.algorithms.sceua(spot_setup, dbname=f"{path_to_out_folder}/{nuts3_region_folder_name}_{calibration_target}_SCEUA_monica_results", dbformat="csv")
-        # sampler = spotpy.algorithms.dream(spot_setup, dbname=f"{path_to_out_folder}/{nuts3_region_folder_name}_DREAM_monica_results", dbformat="csv")
+        sampler = spotpy.algorithms.sceua(spot_setup, dbname=f"{path_to_out_folder}/{run_name}_SCEUA_monica_results", dbformat="csv")
+        # sampler = spotpy.algorithms.dream(spot_setup, dbname=f"{path_to_out_folder}/{run_name}_DREAM_monica_results", dbformat="csv")
         #Run the sampler to produce the paranmeter distribution
         #and identify optimal parameters based on objective function
         #ngs = number of complexes
@@ -292,46 +293,60 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
             #print(f"Time taken to calibrate: {time_taken:.2f} seconds")
 
 
-        def print_status_final(self, stream):
-            print("\n*** Final SPOTPY summary ***")
+        def print_status_final(status, stream):
+            # 1. Result
+            print("\n*** Final SPOTPY summary ***", file=stream)
             print(
                 "Total Duration: "
-                + str(round((time.time() - self.starttime), 2))
+                + str(round((time.time() - status.starttime), 2))
                 + " seconds"
             , file=stream)
-            print("Total Repetitions:", self.rep, file=stream)
+            print("Total Repetitions:", status.rep, file=stream)
 
-            if self.optimization_direction == "minimize":
-                print("Minimal objective value: %g" % (self.objectivefunction_min), file=stream)
+            if status.optimization_direction == "minimize":
+                print("Minimal objective value: %g" % (status.objectivefunction_min), file=stream)
                 print("Corresponding parameter setting:", file=stream)
-                for i in range(self.parameters):
-                    text = "%s: %g" % (self.parnames[i], self.params_min[i])
+                for i in range(status.parameters):
+                    text = "%s: %g" % (status.parnames[i], status.params_min[i])
                     print(text, file=stream)
 
-            if self.optimization_direction == "maximize":
-                print("Maximal objective value: %g" % (self.objectivefunction_max), file=stream)
+            if status.optimization_direction == "maximize":
+                print("Maximal objective value: %g" % (status.objectivefunction_max), file=stream)
                 print("Corresponding parameter setting:", file=stream)
-                for i in range(self.parameters):
-                    text = "%s: %g" % (self.parnames[i], self.params_max[i])
+                for i in range(status.parameters):
+                    text = "%s: %g" % (status.parnames[i], status.params_max[i])
                     print(text, file=stream)
 
-            if self.optimization_direction == "grid":
-                print("Minimal objective value: %g" % (self.objectivefunction_min), file=stream)
+            if status.optimization_direction == "grid":
+                print("Minimal objective value: %g" % (status.objectivefunction_min), file=stream)
                 print("Corresponding parameter setting:", file=stream)
-                for i in range(self.parameters):
-                    text = "%s: %g" % (self.parnames[i], self.params_min[i])
+                for i in range(status.parameters):
+                    text = "%s: %g" % (status.parnames[i], status.params_min[i])
                     print(text, file=stream)
 
-                print("Maximal objective value: %g" % (self.objectivefunction_max), file=stream)
+                print("Maximal objective value: %g" % (status.objectivefunction_max), file=stream)
                 print("Corresponding parameter setting:", file=stream)
-                for i in range(self.parameters):
-                    text = "%s: %g" % (self.parnames[i], self.params_max[i])
+                for i in range(status.parameters):
+                    text = "%s: %g" % (status.parnames[i], status.params_max[i])
                     print(text, file=stream)
 
-            print("******************************\n", file=stream)
+            # 2. Arguments
+            print("\n*** Run arguments ***", file=stream)
+
+            for arg in sys.argv[1:]:
+                if "=" in arg:
+                    key = arg.split("=", 1)[0]
+                    print(f"{key}: {config[key]}", file=stream)
+
+            # 3. Calibration setup
+            print("*** Calibration setup ***", file=stream)
+
+            for key, value in setup.items():
+                print(f"{key}: {value}", file=stream)
+            #print("******************************\n", file=stream)
 
 
-        path_to_best_out_file = f"{path_to_out_folder}/{nuts3_region_folder_name}_best.out"
+        path_to_best_out_file = f"{path_to_out_folder}/{run_name}_best.out"
         with open(path_to_best_out_file, "a") as _:
             print_status_final(sampler.status, _)
 
@@ -339,7 +354,7 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         #    _.write(f"{datetime.now()} results written run-cal\n\n")
 
         #Extract the parameter samples from distribution
-        results = spotpy.analyser.load_csv_results(f"{path_to_out_folder}/{nuts3_region_folder_name}_{calibration_target}_SCEUA_monica_results")
+        results = spotpy.analyser.load_csv_results(f"{path_to_out_folder}/{run_name}_SCEUA_monica_results")
 
         # Plot how the objective function was minimized during sampling
         #font = {"family": "calibri",
@@ -351,11 +366,11 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         plt.show()
         plt.ylabel("W_RMSE")
         plt.xlabel("Iteration")
-        fig.savefig(f"{path_to_out_folder}/{nuts3_region_folder_name}_{calibration_target}_SCEUA_objectivefunctiontrace_MONICA.png", dpi=150)
+        fig.savefig(f"{path_to_out_folder}/{run_name}_SCEUA_objectivefunctiontrace_MONICA.png", dpi=150)
         plt.close(fig)
 
         # OW addition
-        #df = pd.read_csv (f"{path_to_out_folder}/{nuts3_region_folder_name}_SCEUA_monica_results.csv")
+        #df = pd.read_csv (f"{path_to_out_folder}/{run_name}_SCEUA_monica_results.csv")
         #columns_of_interest = ['like1','parSpecificLeafArea', 'parMaxAssimilationRate', 'parDaylengthRequirement', 'parBaseDaylength', 'parCropSpecificMaxRootingDepth']
         #df_selected = df[columns_of_interest]
         #lowest_like1_values = df_selected.nsmallest(100, 'like1')['like1']
@@ -367,7 +382,7 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         #Drop any non-numeric columns (like 'chain') before creating the pair plot
         #df_lowest_like1_numeric = df_lowest_like1.select_dtypes(include='number')
         #fig1 = sns.pairplot(df_lowest_like1_numeric)
-        #fig1.savefig(f"{path_to_out_folder}/{nuts3_region_folder_name}_SCEUA_pair_MONICA.png", dpi=150)
+        #fig1.savefig(f"{path_to_out_folder}/{run_name}_SCEUA_pair_MONICA.png", dpi=150)
         #plt.close(fig1.fig)
 
 
@@ -380,7 +395,7 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         #plt.show()
 
         # Save the plot
-        #fig.savefig(f"{path_to_out_folder}/{nuts3_region_folder_name}_SCEUA_percentage_difference_MONICA.png", dpi=150)
+        #fig.savefig(f"{path_to_out_folder}/{run_name}_SCEUA_percentage_difference_MONICA.png", dpi=150)
         #plt.close(fig)
 
 
