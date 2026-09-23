@@ -115,7 +115,7 @@ def run_producer(server={"server": None, "port": None}):
     setup_id = run_setups[0]
     run_name = f"setup{setup_id}"
 
-    path_to_out_file = f"{config["path_to_out"]}/{run_name}_producer.out"
+    path_to_out_file = f"{config['path_to_out']}/{run_name}_producer.out"
     if not os.path.exists(config["path_to_out"]):
         try:
             os.makedirs(config["path_to_out"])
