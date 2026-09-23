@@ -115,9 +115,6 @@ def run_calibration(config, setup_id):
     cons_chan_data = get_reader_writer_srs_from_channel(config["path_to_channel"], f"cons_chan_setup{setup_id}")
     procs.append(cons_chan_data["chan"])
 
-    #with open(path_to_out_folder + "/spot_setup.out", "a") as _:
-    #    _.write(f"{datetime.now()} Process procs.append(sp.Popen(.()producer\n")
-
     procs.append(sp.Popen([
         config["path_to_python"],
         "run-producer_calibration.py",
@@ -129,9 +126,6 @@ def run_calibration(config, setup_id):
         f"reader_sr={prod_chan_data['reader_sr']}",
         f"path_to_out={config['path_to_out']}",
     ]))
-
-    #with open(path_to_out_folder + "/spot_setup.out", "a") as _:
-    #    _.write(f"{datetime.now()} Process procs.append(sp.Popen(.()consumer\n")
 
     procs.append(sp.Popen([
         config["path_to_python"],
@@ -273,8 +267,9 @@ def run_calibration(config, setup_id):
 
         weights_per_observation = np.array([weights[observation["id"]] for observation in filtered_observations])
 
+        spot_setup_out_file = f"{run_name}_spot_setup.out"
         spot_setup = calibration_spotpy_setup_MONICA.spot_setup(params, filtered_observations, prod_writer, cons_reader,
-                                                                path_to_out_folder, current_only_nuts3_region_ids,
+                                                                path_to_out_folder, spot_setup_out_file,current_only_nuts3_region_ids,
                                                                 weights_per_observation)
 
         # spot_setup = calibration_spotpy_setup_MONICA.spot_setup(params, filtered_observations, prod_writer, cons_reader,
@@ -291,7 +286,7 @@ def run_calibration(config, setup_id):
         #kstop = max number of evolution loops before convergence
         #peps = convergence criterion
         #pcento = percent change allowed in kstop loops before convergence
-        with open(f"{path_to_out_folder}/{run_name}_spot_setup.out", "a") as _:
+        with open(f"{path_to_out_folder}/{spot_setup_out_file}", "a") as _:
             _.write(f"{datetime.now()} setup{setup_id} sampler starts run-cal\n")
 
         sampler.sample(rep, ngs=len(params)*2+1, kstop = 100 , peps=0.0001, pcento=0.0001)
@@ -299,13 +294,13 @@ def run_calibration(config, setup_id):
 
         # sampler.sample(rep, nChains = 20, nCr = 3, eps = (10e-6), convergence_limit=1.0)
 
-        with open(f"{path_to_out_folder}/{run_name}_spot_setup.out", "a") as _:
+        with open(f"{path_to_out_folder}/{spot_setup_out_file}", "a") as _:
             _.write(f"{datetime.now()} sampler ends run-cal\n")
         # end timer
         end_time = time.time()
         time_taken = end_time - start_time
         if time_taken > 10:
-            with open(f"{path_to_out_folder}/{run_name}_spot_setup.out", "a") as _:
+            with open(f"{path_to_out_folder}/{spot_setup_out_file}", "a") as _:
                 _.write(f"{datetime.now()} Time taken to calibrate: {time_taken:.2f} seconds\n")
             #print(f"Time taken to calibrate: {time_taken:.2f} seconds")
 
