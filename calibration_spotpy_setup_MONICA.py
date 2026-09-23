@@ -152,7 +152,7 @@ def calculate_weighted_rmse(evaluation, simulation, weight_per_observation):
         sim = np.array(simulation)
         weights = np.array(weight_per_observation)
 
-        valid = ~np.isfinite(obs) & ~np.isfinite(sim) & ~np.isfinite(weights)
+        valid = np.isfinite(obs) & np.isfinite(sim) & np.isfinite(weights)
         
         # Weighted squared differences
         weighted_squared_diff = weights[valid] * (sim[valid] - obs[valid]) ** 2
