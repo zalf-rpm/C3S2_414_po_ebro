@@ -30,6 +30,26 @@
 				["Year", "LAST"],
 				["Yield", "LAST"],
 				["NLeach", "SUM"]
+			],
+			
+			"anthesis", [
+				["Year", "LAST"],
+				["DOY|AnthesisDOY", "LAST"]
+			],
+		
+			"maturity", [
+				["Year", "LAST"],
+				["DOY|MaturityDOY", "LAST"]
+			],
+		
+			"Harvest", [
+				["Year", "LAST"],
+				["DOY|HarvestDOY", "LAST"]
+			],
+		
+			"cereal-stem-elongation", [
+				["Year", "LAST"],
+				["DOY|StemElongationDOY", "LAST"]
 			]
 		]
 	},

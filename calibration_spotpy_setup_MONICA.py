@@ -33,7 +33,7 @@ fbp_capnp = capnp.load(str(PATH_TO_CAPNP_SCHEMAS / "fbp.capnp"), imports=abs_imp
 
 class spot_setup(object):
     #def __init__(self, user_params, observations, prod_writer, cons_reader, path_to_out, only_nuts3_region_ids):
-    def __init__(self, user_params, observations, prod_writer, cons_reader, path_to_out, only_nuts3_region_ids, weight_per_region):
+    def __init__(self, user_params, observations, prod_writer, cons_reader, path_to_out, only_nuts3_region_ids, weight_per_observation):
         self.user_params = user_params
         self.params = []
         self.observations = observations
@@ -42,7 +42,7 @@ class spot_setup(object):
         self.cons_reader = cons_reader
         self.path_to_out_file = path_to_out + "/spot_setup.out"
         self.only_nuts3_region_ids = only_nuts3_region_ids
-        self.weight_per_region = weight_per_region
+        self.weight_per_observation = weight_per_observation
 
         if not os.path.exists(path_to_out):
             try:
@@ -82,7 +82,7 @@ class spot_setup(object):
 
         in_ip = msg.value.as_struct(fbp_capnp.IP)
         s: str = in_ip.content.as_text()
-        nuts3_region_id_and_year_to_avg_yield = json.loads(s)
+        simulation_results = json.loads(s)
 
         #with open(self.path_to_out_file, "a") as _:
         #    _.write(f"{datetime.now()} jsons loaded cal-sp-set-M\n")
@@ -91,12 +91,9 @@ class spot_setup(object):
         # remove all simulation results which are not in the observed list
         sim_list = []
         for d in self.observations:
-            key = f"{d['id']}|{d['year']}"
-            if key in nuts3_region_id_and_year_to_avg_yield:
-                #if np.isnan(d["value"]):
-                #    sim_list.append(np.nan)
-                #else:
-                sim_list.append(nuts3_region_id_and_year_to_avg_yield[key])
+            key = f"{d['id']}|{d['year']}|{d['sim_variable']}"
+            if key in simulation_results:
+                sim_list.append(simulation_results[key])
             else:
                 sim_list.append(np.nan)
 
@@ -122,11 +119,11 @@ class spot_setup(object):
         #return unbiased_rmse_RB(evaluation, simulation)
         #return spotpy.objectivefunctions.rmse(evaluation, simulation)
         #return calculate_percentage_difference_new(evaluation, simulation)
-        return calculate_weighted_rmse(evaluation, simulation, self.weight_per_region)
+        return calculate_weighted_rmse(evaluation, simulation, self.weight_per_observation)
 
 
 
-def calculate_weighted_rmse(evaluation, simulation, weight_per_region):
+def calculate_weighted_rmse(evaluation, simulation, weight_per_observation):
     """
     Calculate the weighted RMSE (Root Mean Squared Error).
 
@@ -153,16 +150,15 @@ def calculate_weighted_rmse(evaluation, simulation, weight_per_region):
     if len(evaluation) == len(simulation):
         obs = np.array(evaluation)
         sim = np.array(simulation)
-        #pixels_array = np.array(pixels) It's used for weights calculation and they're already stored in the csv file
-        
-        # Calculate weights
-        #weights = pixels_array / np.sum(pixels_array)
+        weights = np.array(weight_per_observation)
+
+        valid = ~np.isfinite(obs) & ~np.isfinite(sim) & ~np.isfinite(weights)
         
         # Weighted squared differences
-        weighted_squared_diff = weight_per_region * (sim - obs) ** 2
+        weighted_squared_diff = weights[valid] * (sim[valid] - obs[valid]) ** 2
         
         # Weighted RMSE calculation
-        weighted_rmse = np.sqrt(np.nansum(weighted_squared_diff) / 1)
+        weighted_rmse = np.sqrt(np.sum(weighted_squared_diff) / np.sum(weights[valid]))
         
         return weighted_rmse
     else:

@@ -133,35 +133,57 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
     crop_code = crop_id.split("_")[0]
     parameter_setting_file = setup["parameter-setting-file"]
 
-    crop_to_observations = defaultdict(list)
+    # Read observations
+    obs_to_sim = {
+        "yield": "Yield",
+        "SOSD": "StemElongationDOY",
+        "MAXD": "AnthesisDOY",
+        "EOSD": "MaturityDOY"
+    }
+
+    def read_observations(path, variable, scale=1.0):
+        observations = []
+        region_id_to_name = {}
+        with open(path) as file:
+            dialect = csv.Sniffer().sniff(file.read(), delimiters=';,\t')
+            file.seek(0)
+            reader = csv.reader(file, dialect)
+
+            #get year from header
+            header = next(reader, None) 
+            years = [int(y) for y in header[1:-1]]
+
+            for row in reader:
+                id = int(row[-1])
+                name = row[0].strip()
+                region_id_to_name[id] = name
+                for i, year in enumerate(years, start=1):
+                    text = row[i].strip()
+                    value = (np.nan if not text or text.upper() == "NA" else float(text))
+                    if not np.isnan(value) and value < 0:
+                        value = np.nan
+                    observations.append({"id": id,
+                                         "year": year,
+                                         "variable": variable,
+                                         "sim_variable": obs_to_sim[variable],
+                                         "value": value * scale})
+        return observations, region_id_to_name
+
+    observations = []
     nuts3_region_id_to_name = {}
-    with (open(f"data/{region}/{region}_{crop_code}_yield.csv") as file): # Define per crop #
-        dialect = csv.Sniffer().sniff(file.read(), delimiters=';,\t')
-        file.seek(0)
-        reader = csv.reader(file, dialect)
 
-        #get year from header
-        header = next(reader, None) 
-        years = [int(y) for y in header[1:-1]]
+    calibration_target = setup["calibration-target"]
+    obs_vars = calibration_target.split("|")
+    for obs_var in obs_vars:
+        path = f"data/{region}/{region}_{crop_code}_{obs_var}.csv"
+        scale = 1000.0 if obs_var == "yield" else 1.0
+        obs, names = read_observations(path, obs_var, scale)
+        observations.extend(obs)
+        nuts3_region_id_to_name.update(names)
 
-        for row in reader:
-            id = int(row[-1])
-            name = row[0].strip()
-            nuts3_region_id_to_name[id] = name
-            for i, year in enumerate(years, start=1):
-                yield_text = row[i].strip()
-                yield_t = np.nan if not yield_text or yield_text.upper() == "NA" else float(yield_text)
-                crop_to_observations[crop_code].append({ # Define per crop #
-                    "id": id,
-                    "year": year,
-                    "value": np.nan if yield_t < 0.0 else yield_t * 1000.0  # t/ha -> kg/ha nan is -9999
-                })
-
-    #with open(path_to_out_folder + "/spot_setup.out", "a") as _:
-    #    _.write(f"{datetime.now()} Consumer received and finished\n")
-    # order obs list by id to avoid mismatch between observation/evaluation lists
-    for crop, obs in crop_to_observations.items():
-        obs.sort(key=lambda r: [r["id"], r["year"]])
+    observations.sort(
+        key=lambda r: [r["id"], r["year"], r["variable"]]
+    )
 
     # read parameters which are to be calibrated
     params = []
@@ -197,7 +219,6 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
     prod_writer = con_man.try_connect(prod_chan_data["writer_sr"], cast_as=fbp_capnp.Channel.Writer, retry_secs=1)
 
     # configure MONICA setup for spotpy
-    observations = crop_to_observations[crop_code]
     only_nuts3_region_ids = json.loads(config["only_nuts3_region_ids"])
 
     to_be_run_only_nuts3_region_ids = []
@@ -244,7 +265,7 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         rep = int(config["repetitions"]) #initial number was 10
         results = []
         #Set up the sampler with the model above
-        sampler = spotpy.algorithms.sceua(spot_setup, dbname=f"{path_to_out_folder}/{nuts3_region_folder_name}_SCEUA_monica_results", dbformat="csv")
+        sampler = spotpy.algorithms.sceua(spot_setup, dbname=f"{path_to_out_folder}/{nuts3_region_folder_name}_{calibration_target}_SCEUA_monica_results", dbformat="csv")
         # sampler = spotpy.algorithms.dream(spot_setup, dbname=f"{path_to_out_folder}/{nuts3_region_folder_name}_DREAM_monica_results", dbformat="csv")
         #Run the sampler to produce the paranmeter distribution
         #and identify optimal parameters based on objective function
@@ -318,7 +339,7 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         #    _.write(f"{datetime.now()} results written run-cal\n\n")
 
         #Extract the parameter samples from distribution
-        results = spotpy.analyser.load_csv_results(f"{path_to_out_folder}/{nuts3_region_folder_name}_SCEUA_monica_results")
+        results = spotpy.analyser.load_csv_results(f"{path_to_out_folder}/{nuts3_region_folder_name}_{calibration_target}_SCEUA_monica_results")
 
         # Plot how the objective function was minimized during sampling
         #font = {"family": "calibri",
@@ -330,7 +351,7 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         plt.show()
         plt.ylabel("W_RMSE")
         plt.xlabel("Iteration")
-        fig.savefig(f"{path_to_out_folder}/{nuts3_region_folder_name}_SCEUA_objectivefunctiontrace_MONICA.png", dpi=150)
+        fig.savefig(f"{path_to_out_folder}/{nuts3_region_folder_name}_{calibration_target}_SCEUA_objectivefunctiontrace_MONICA.png", dpi=150)
         plt.close(fig)
 
         # OW addition

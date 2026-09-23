@@ -23,6 +23,7 @@ import os
 from pathlib import Path
 import sys
 import zmq
+import numpy as np
 
 PATH_TO_REPO = Path(os.path.realpath(__file__)).parent
 PATH_TO_MAS_INFRASTRUCTURE_REPO = PATH_TO_REPO / "../mas-infrastructure"
@@ -74,13 +75,18 @@ def run_consumer(server=None, port=None):
     socket.connect("tcp://" + config["server"] + ":" + config["port"])
     socket.RCVTIMEO = config["timeout"]
 
-    nuts3_region_id_to_year_to_yields = defaultdict(lambda: defaultdict(list))
-
     conman = common.ConnectionManager()
     writer = conman.try_connect(config["writer_sr"], cast_as=fbp_capnp.Channel.Writer, retry_secs=1)  #None
 
     envs_received = 0
     no_of_envs_expected = None
+
+    outputs = ["Yield", "AnthesisDOY", "MaturityDOY", "StemElongationDOY"]
+    values = defaultdict(
+        lambda: defaultdict(
+            lambda: defaultdict(list)
+        )
+    )
 
     while True:
         try:
@@ -105,28 +111,33 @@ def run_consumer(server=None, port=None):
                 for data in msg.get("data", []):
                     results = data.get("results", [])
                     for vals in results:
-                        if "Year" in vals:
-                            nuts3_region_id_to_year_to_yields[nuts3_region_id][int(vals["Year"])].append(vals["Yield"]*1.16) ## Conversion to fresh matter yields ##
+                        if "Year" not in vals:
+                            continue
+                        year = int(vals["Year"])
+                        for variable in outputs:
+                            if variable not in vals:
+                                continue
+                            value = vals[variable]
+                            if variable == "Yield":
+                                value *= 1.16 ## Conversion to fresh matter yields ##
+                            values[nuts3_region_id][year][variable].append(value)
 
             if no_of_envs_expected == envs_received and writer:
                 with open(path_to_out_file, "a") as _:
                     _.write(f"{datetime.now()} last expected env received\n")
                 #print("last expected env received")
-                nuts3_region_id_and_year_to_avg_yield = {}
-                for nuts3_region_id, rest in nuts3_region_id_to_year_to_yields.items():
-                    for year, yields in rest.items():
-                        no_of_yields = len(yields)
-                        if no_of_yields > 0:
-                            nuts3_region_id_and_year_to_avg_yield[f"{nuts3_region_id}|{year}"] = sum(yields) / no_of_yields
+                simulation_results = {}
+                for region_id, by_year in values.items():
+                    for year, by_variable in by_year.items():
+                        for variable, vals in by_variable.items():
+                            if len(vals) > 0:
+                                simulation_results[f"{region_id}|{year}|{variable}"] = np.nanmean(vals)
 
-                #with open(path_to_out_file, "a") as _:
-                #    _.write(f"{datetime.now()} region_id to year to avg yield: {nuts3_region_id_and_year_to_avg_yield}\n")
-
-                out_ip = fbp_capnp.IP.new_message(content=json.dumps(nuts3_region_id_and_year_to_avg_yield))
+                out_ip = fbp_capnp.IP.new_message(content=json.dumps(simulation_results))
                 writer.write(value=out_ip).wait()
 
                 # reset and wait for next round
-                nuts3_region_id_to_year_to_yields.clear()
+                values.clear()
                 no_of_envs_expected = None
                 envs_received = 0
 
