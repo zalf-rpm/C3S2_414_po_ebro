@@ -53,6 +53,7 @@ def run_consumer(server=None, port=None):
         "mode": "remoteConsumer-remoteMonica",
         "port": port if port else "7777",  # local 7778,  remote 7777
         "server": server if server else "login01.cluster.zalf.de",
+        "run-setups": "[1]",
         "writer_sr": None,
         "path_to_out": "out/",
         "timeout": 600000  # 10min
@@ -60,7 +61,15 @@ def run_consumer(server=None, port=None):
 
     common.update_config(config, sys.argv, print_config=True, allow_new_keys=False)
 
-    path_to_out_file = config["path_to_out"] + "/consumer.out"
+    run_setups = json.loads(config["run-setups"])
+    
+    if len(run_setups) < 1:
+        return
+
+    setup_id = run_setups[0]
+    run_name = f"setup{setup_id}"
+
+    path_to_out_file = f"{config["path_to_out"]}/{run_name}_consumer.out"
     if not os.path.exists(config["path_to_out"]):
         try:
             os.makedirs(config["path_to_out"])

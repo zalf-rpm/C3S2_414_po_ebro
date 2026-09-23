@@ -15,6 +15,8 @@ import time
 import uuid
 
 import calibration_spotpy_setup_MONICA
+from calibration_utils import update_parameter_values
+
 
 PATH_TO_REPO = Path(os.path.realpath(__file__)).parent
 PATH_TO_MAS_INFRASTRUCTURE_REPO = PATH_TO_REPO / "../mas-infrastructure"
@@ -51,8 +53,7 @@ def get_reader_writer_srs_from_channel(path_to_channel_binary, chan_name=None):
 
 local_run = False
 
-
-def run_calibration(server=None, prod_port=None, cons_port=None):
+def get_config(server=None, prod_port=None, cons_port=None):
     config = {
         "mode": "mbm-local-remote",
         "prod-port": prod_port if prod_port else "6666",  # local: 6667, remote 6666
@@ -74,21 +75,44 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
 
     common.update_config(config, sys.argv, print_config=True, allow_new_keys=False)
 
+    return config
+    
+def run_calibration(config, setup_id):
+    # Read current setup
+    setups = monica_run_lib.read_sim_setups(config["setups-file"])
+
+    if setup_id not in setups:
+        raise ValueError(
+            f"Setup {setup_id} not found in "
+            f"{config['setups-file']}"
+        )
+
+    setup = setups[setup_id]
+
+    region = setup["region"]
+    crop_id = setup["crop-id"]
+    crop_code = crop_id.split("_")[0]
+
+    parameter_setting_file = (setup["parameter-setting-file"])
+
+    # This is what will be passed to producer
+    current_run_setup = json.dumps([setup_id])
+    
     path_to_out_folder = config['path_to_out']
     if not os.path.exists(path_to_out_folder):
         try:
             os.makedirs(path_to_out_folder)
         except OSError:
             print("run-calibration.py: Couldn't create dir:", path_to_out_folder, "!")
-    path_to_out_file = path_to_out_folder + "/run-calibration.out"
+    path_to_out_file = f"{path_to_out_folder}/setup{setup_id}_run-calibration.out"
     with open(path_to_out_file, "a") as _:
-        _.write(f"{datetime.now()} config: {config}\n")
+        _.write(f"{datetime.now()} starting setup {setup_id}, config: {config}\n")
 
     procs = []
 
-    prod_chan_data = get_reader_writer_srs_from_channel(config["path_to_channel"], "prod_chan")
+    prod_chan_data = get_reader_writer_srs_from_channel(config["path_to_channel"], f"prod_chan_setup{setup_id}")
     procs.append(prod_chan_data["chan"])
-    cons_chan_data = get_reader_writer_srs_from_channel(config["path_to_channel"], "cons_chan")
+    cons_chan_data = get_reader_writer_srs_from_channel(config["path_to_channel"], f"cons_chan_setup{setup_id}")
     procs.append(cons_chan_data["chan"])
 
     #with open(path_to_out_folder + "/spot_setup.out", "a") as _:
@@ -99,9 +123,9 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         "run-producer_calibration.py",
         "mode=mbm-local-remote" if local_run else "mode=hpc-local-remote",
         f"server={config['server']}",
-        f"port={config['prod-port']}",
+        f"server-port={config['prod-port']}",
         f"setups-file={config['setups-file']}",
-        f"run-setups={config['run-setups']}",
+        f"run-setups={current_run_setup}",
         f"reader_sr={prod_chan_data['reader_sr']}",
         f"path_to_out={config['path_to_out']}",
     ]))
@@ -115,21 +139,11 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         # "mode=remoteConsumer-remoteMonica",
         f"server={config['server']}",
         f"port={config['cons-port']}",
-        f"run-setups={config['run-setups']}",
+        f"run-setups={current_run_setup}",
         f"writer_sr={cons_chan_data['writer_sr']}",
         f"path_to_out={config['path_to_out']}",
     ]))
 
-
-    setups = monica_run_lib.read_sim_setups(config["setups-file"])
-    run_setups = json.loads(config["run-setups"])
-    if len(config["run-setups"]) < 1:
-        return
-    setup_id = run_setups[0]
-    setup = setups[setup_id]
-
-    region = setup["region"]
-    crop_id = setup["crop-id"]
     crop_code = crop_id.split("_")[0]
     parameter_setting_file = setup["parameter-setting-file"]
 
@@ -235,8 +249,11 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         # start timer 
         start_time = time.time()
 
-        nuts3_region_folder_name = "-".join(map(str, current_only_nuts3_region_ids))
         run_name = f"setup{setup_id}"
+        if current_only_nuts3_region_ids:
+            nuts3_label = "-".join(map(str, current_only_nuts3_region_ids))
+            run_name += f"_{nuts3_label}"
+
         filtered_observations = observations
         if len(current_only_nuts3_region_ids) > 0:
             filtered_observations = list(filter(lambda d: d["id"] in current_only_nuts3_region_ids, observations))
@@ -274,28 +291,28 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
         #kstop = max number of evolution loops before convergence
         #peps = convergence criterion
         #pcento = percent change allowed in kstop loops before convergence
-        with open(path_to_out_folder + "/spot_setup.out", "a") as _:
-            _.write(f"{datetime.now()} sampler starts run-cal\n")
+        with open(f"{path_to_out_folder}/{run_name}_spot_setup.out", "a") as _:
+            _.write(f"{datetime.now()} setup{setup_id} sampler starts run-cal\n")
 
         sampler.sample(rep, ngs=len(params)*2+1, kstop = 100 , peps=0.0001, pcento=0.0001)
 
 
         # sampler.sample(rep, nChains = 20, nCr = 3, eps = (10e-6), convergence_limit=1.0)
 
-        with open(path_to_out_folder + "/spot_setup.out", "a") as _:
+        with open(f"{path_to_out_folder}/{run_name}_spot_setup.out", "a") as _:
             _.write(f"{datetime.now()} sampler ends run-cal\n")
         # end timer
         end_time = time.time()
         time_taken = end_time - start_time
         if time_taken > 10:
-            with open(path_to_out_folder + "/spot_setup.out", "a") as _:
+            with open(f"{path_to_out_folder}/{run_name}_spot_setup.out", "a") as _:
                 _.write(f"{datetime.now()} Time taken to calibrate: {time_taken:.2f} seconds\n")
             #print(f"Time taken to calibrate: {time_taken:.2f} seconds")
 
-
+        # Print final results
         def print_status_final(status, stream):
             # 1. Result
-            print("\n*** Final SPOTPY summary ***", file=stream)
+            print("*** Final SPOTPY summary ***", file=stream)
             print(
                 "Total Duration: "
                 + str(round((time.time() - status.starttime), 2))
@@ -337,21 +354,73 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
                 if "=" in arg:
                     key = arg.split("=", 1)[0]
                     print(f"{key}: {config[key]}", file=stream)
+            print(f"current-setup: {setup_id}", file=stream)
 
             # 3. Calibration setup
-            print("*** Calibration setup ***", file=stream)
+            print("\n*** Calibration setup ***", file=stream)
 
             for key, value in setup.items():
                 print(f"{key}: {value}", file=stream)
             #print("******************************\n", file=stream)
 
-
         path_to_best_out_file = f"{path_to_out_folder}/{run_name}_best.out"
-        with open(path_to_best_out_file, "a") as _:
+        with open(path_to_best_out_file, "w") as _:
             print_status_final(sampler.status, _)
 
-        #with open(path_to_out_folder + "/spot_setup.out", "a") as _:
-        #    _.write(f"{datetime.now()} results written run-cal\n\n")
+        # Write calibrated parameter file
+        def save_calibrated_cultivar(setup, config, crop_code, best_params, path_to_out_folder, run_name, optimization):
+            # read sim.json
+            with open(setup.get("sim.json", config["sim.json"])) as _:
+                sim_json = json.load(_)
+
+            include_base_path = Path(sim_json["include-file-base-path"])
+
+            if not include_base_path.is_absolute():
+                include_base_path = PATH_TO_REPO / include_base_path
+
+            # read crop.json
+            with open(setup.get("crop.json", config["crop.json"])) as _:
+                crop_json = json.load(_)
+
+            crop_params = crop_json["crops"][crop_code]["cropParams"]
+            species_file = include_base_path / crop_params["species"][1]
+            cultivar_file = include_base_path / crop_params["cultivar"][1]
+
+            # read original parameter file
+            with open(species_file) as _:
+                species = json.load(_)
+
+            with open(cultivar_file) as _:  
+                cultivar = json.load(_)
+
+            ps = {"species": species, "cultivar": cultivar}
+
+            # update parameter values
+            ps = update_parameter_values(ps, best_params)
+
+            # Write species, cultivar file
+            calibrated_species_files = f"{path_to_out_folder}/{run_name}_calibrated_species_{optimization}.json"
+            with open(calibrated_species_files, "w") as _:
+                json.dump(ps["species"], _, indent=2)
+
+            calibrated_cultivar_files = f"{path_to_out_folder}/{run_name}_calibrated_cultivar_{optimization}.json"
+            with open(calibrated_cultivar_files, "w") as _:
+                json.dump(ps["cultivar"], _, indent=2)
+
+        if sampler.status.optimization_direction == "minimize" or sampler.status.optimization_direction == "grid":
+            best_params = {
+                name: float(value)
+                for name, value in zip(sampler.status.parnames, sampler.status.params_min)
+            }
+            save_calibrated_cultivar(setup, config, crop_code, best_params, path_to_out_folder, run_name, "min")
+
+        if sampler.status.optimization_direction == "maximize" or sampler.status.optimization_direction == "grid":
+            best_params = {
+                name: float(value)
+                for name, value in zip(sampler.status.parnames, sampler.status.params_max)
+            }
+            save_calibrated_cultivar(setup, config, crop_code, best_params, path_to_out_folder, run_name, "max")
+
 
         #Extract the parameter samples from distribution
         results = spotpy.analyser.load_csv_results(f"{path_to_out_folder}/{run_name}_SCEUA_monica_results")
@@ -404,10 +473,21 @@ def run_calibration(server=None, prod_port=None, cons_port=None):
     for proc in procs:
         proc.terminate()
 
+    # Wait for all process to terminate cleanly, and force-kill any that remain after 10 seconds before starting the next setup
+    for proc in procs:
+        try:
+            proc.wait(timeout=10)
+        except sp.TimeoutExpired:
+            proc.kill()
+            proc.wait()
     
     print("sampler_MONICA.py finished")
 
 if __name__ == "__main__":
-    run_calibration()
+    config = get_config()
+    run_setups = json.loads(config["run-setups"])
+
+    for setup_id in run_setups:
+        run_calibration(config, setup_id)
 
 

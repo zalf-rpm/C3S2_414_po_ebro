@@ -31,6 +31,7 @@ import rasterio
 import monica_io3
 import soil_io3
 import monica_run_lib as Mrunlib
+from calibration_utils import update_parameter_values
 
 PATH_TO_REPO = Path(os.path.realpath(__file__)).parent
 PATH_TO_MAS_INFRASTRUCTURE_REPO = PATH_TO_REPO / "../mas-infrastructure"
@@ -94,8 +95,8 @@ def run_producer(server={"server": None, "port": None}):
         "start-row": "0",
         "end-row": "-1",
         "path_to_dem_grid": "",
-        "sim.json": "sim_calibration.json",
-        "crop.json": "crop_calibration.json",
+        "sim.json": "sim.json",
+        "crop.json": "crop.json",
         "site.json": "site.json",
         "setups-file": "sim_setups_calibration.csv", 
         "run-setups": "[1]",
@@ -106,7 +107,15 @@ def run_producer(server={"server": None, "port": None}):
 
     common.update_config(config, sys.argv, print_config=True, allow_new_keys=False)
 
-    path_to_out_file = config["path_to_out"] + "/producer.out"
+    run_setups = json.loads(config["run-setups"])
+
+    if len(run_setups) < 1:
+        return
+    
+    setup_id = run_setups[0]
+    run_name = f"setup{setup_id}"
+
+    path_to_out_file = f"{config["path_to_out"]}/{run_name}_producer.out"
     if not os.path.exists(config["path_to_out"]):
         try:
             os.makedirs(config["path_to_out"])
@@ -122,16 +131,11 @@ def run_producer(server={"server": None, "port": None}):
 
     # read setup from csv file
     setups = Mrunlib.read_sim_setups(config["setups-file"])
-    run_setups = json.loads(config["run-setups"])
     print("read sim setups: ", config["setups-file"])
 
     with open(path_to_out_file, "a") as _:
         _.write(f"{datetime.now()} setup read\n") 
 
-    if len(run_setups) < 1:
-        return
-
-    setup_id = run_setups[0]
     setup = setups[setup_id]
 
     region = setup["region"]
@@ -366,91 +370,7 @@ def run_producer(server={"server": None, "port": None}):
                         ps = ws["crop"]["cropParams"]
                         break
 
-                for sampled_name, sampled_value in params.items():
-                    # separate array index
-                    parts = sampled_name.rsplit("_", 1)
-                    if len(parts) == 2 and parts[1].isdigit():
-                        base_name = parts[0]
-                        position_in_array = int(parts[1])
-                    else:
-                        base_name = sampled_name
-                        position_in_array = None
-                    
-                    # check whether sampled value is a scaling factor
-                    is_factor = base_name.endswith("Factor")
-                    pname = base_name.removesuffix("Factor")
-
-                    # parameter group (species, cultivar)
-                    if pname in ps["species"]:
-                        ptype = "species"
-                    elif pname in ps["cultivar"]:
-                        ptype = "cultivar"
-                    else:
-                        continue
-
-                    # for debugging
-                    # old_value = (ps[ptype][pname].copy() if isinstance(ps[ptype][pname], list) else ps[ptype][pname])
-
-                    # check if the parameter is [data, unit] or [data]
-                    param_all = ps[ptype][pname]
-                    has_unit = (isinstance(param_all, list) and len(param_all) == 2 and isinstance(param_all[1], str))
-                    if has_unit:
-                        param_val = param_all[0]
-                    else:
-                        param_val = param_all
-
-                    # explicitly specificed position in array
-                    if position_in_array is not None:
-                        if is_factor:
-                            param_val[position_in_array] *= sampled_value
-                        else:
-                            param_val[position_in_array] = sampled_value
-                    else:
-                        # default target positions
-                        indices = None
-                        if pname == "StageTemperatureSum":
-                            indices = range(0,6)
-                        elif pname == "VernalisationRequirement":
-                            indices = range(0,6)
-                        elif pname == "BaseDaylength":
-                            indices = range(2,4)
-                        elif pname == "DaylengthRequirement":
-                            indices = range(1,4)
-                        elif pname == "SpecificLeafArea":
-                            indices = range(0,6)
-
-                        # check if the parameter is an array
-                        if indices is not None:
-                            for index in indices:
-                                if is_factor:
-                                    param_val[index] *= sampled_value
-                                else:
-                                    param_val[index] = sampled_value
-                        else:
-                            if is_factor:
-                                param_val *= sampled_value
-                            else:
-                                param_val = sampled_value
-
-                            # param_val is a scalar copy, so assign it back to the original parameter structure
-                            if has_unit:
-                                ps[ptype][pname][0] = param_val
-                            else:
-                                ps[ptype][pname] = param_val
-
-                        # additional parameter changes
-                        if pname == "StageTemperatureSum" and is_factor:
-                            ps["cultivar"]["BeginSensitivePhaseHeatStress"][0] *= sampled_value
-                            ps["cultivar"]["EndSensitivePhaseHeatStress"][0] *= sampled_value
-
-                    # for debugging
-                    # with open(path_to_out_file, "a") as _:
-                    #     _.write(
-                    #         f"{sampled_name} ({ptype}.{pname}): "
-                    #         f"sampled={sampled_value}, "
-                    #         f"before={old_value}, "
-                    #         f"after={ps[ptype][pname]}\n"
-                    #     )
+                ps = update_parameter_values(ps, params)
 
                 scols = int(soil_metadata["ncols"])
                 srows = int(soil_metadata["nrows"])
