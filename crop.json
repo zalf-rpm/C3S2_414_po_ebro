@@ -18,7 +18,7 @@
 		}		
 	},
 	"cropRotationTemplates": {
-		"DW": [
+		"DW_po_valley": [
 			{
 				"worksteps": [
 					{
@@ -34,13 +34,13 @@
 					},
 					{
 						"type": "MineralFertilization",
-						"date": "0001-03-01",
+						"date": "0001-03-05",
 						"amount": [65.0, "kg N"],
 						"partition": ["include-from-file", "mineral-fertilisers/AN.json"]
 					},
 					{
 						"type": "MineralFertilization",
-						"date": "0001-04-01",
+						"date": "0001-04-05",
 						"amount": [65.0, "kg N"],
 						"partition": ["include-from-file", "mineral-fertilisers/AN.json"]
 					},
@@ -52,19 +52,81 @@
 						"max-3d-precip-sum": 2,
 						"max-curr-day-precip": 0.1,
 						"harvest-time": "maturity"
-					},
-					{
-						"type": "OrganicFertilization",
-						"days": 1,
-						"after": "Harvest",
-						"amount": [15000, "kg N"],
-						"parameters": ["include-from-file", "organic-fertilisers/CAM.json"],
-						"incorporation": true
 					}
 				]
 			}
 		],
-		"WB": [
+		"WB_po_valley": [
+			{
+				"worksteps": [
+					{
+						"date": "0000-10-24",
+						"type": "Sowing",
+						"crop": ["ref", "crops", "WB"]
+					},
+					{
+						"type": "MineralFertilization",
+						"date": "0001-03-05",
+						"amount": [60.0, "kg N"],
+						"partition": ["include-from-file", "mineral-fertilisers/AN.json"]
+					},
+					{
+						"type": "MineralFertilization",
+						"date": "0001-04-05",
+						"amount": [60.0, "kg N"],
+						"partition": ["include-from-file", "mineral-fertilisers/AN.json"]
+					},
+					{
+						"type": "AutomaticHarvest",
+						"latest-date": "0001-08-15",
+						"min-%-asw": 0,
+						"max-%-asw": 150.0,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"harvest-time": "maturity"
+					}
+				]
+			}
+		],
+		"DW_ebro_valley": [
+			{
+				"worksteps": [
+					{
+						"date": "0000-11-24",
+						"type": "Sowing",
+						"crop": ["ref", "crops", "DW"]
+					},
+					{
+						"type": "MineralFertilization",
+						"date": "0000-11-24",
+						"amount": [30.0, "kg N"],
+						"partition": ["include-from-file", "mineral-fertilisers/AN.json"]
+					},
+					{
+						"type": "MineralFertilization",
+						"date": "0001-03-05",
+						"amount": [65.0, "kg N"],
+						"partition": ["include-from-file", "mineral-fertilisers/AN.json"]
+					},
+					{
+						"type": "MineralFertilization",
+						"date": "0001-04-05",
+						"amount": [65.0, "kg N"],
+						"partition": ["include-from-file", "mineral-fertilisers/AN.json"]
+					},
+					{
+						"type": "AutomaticHarvest",
+						"latest-date": "0001-08-15",
+						"min-%-asw": 0,
+						"max-%-asw": 150.0,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"harvest-time": "maturity"
+					}
+				]
+			}
+		],
+		"WB_ebro_valley": [
 			{
 				"worksteps": [
 					{
@@ -74,19 +136,19 @@
 					},
 					{
 						"type": "MineralFertilization",
-						"date": "0001-03-01",
+						"date": "0001-03-05",
 						"amount": [60.0, "kg N"],
 						"partition": ["include-from-file", "mineral-fertilisers/AN.json"]
 					},
 					{
 						"type": "MineralFertilization",
-						"date": "0001-04-01",
+						"date": "0001-04-05",
 						"amount": [60.0, "kg N"],
 						"partition": ["include-from-file", "mineral-fertilisers/AN.json"]
 					},
 					{
 						"type": "AutomaticHarvest",
-						"latest-date": "0001-09-05",
+						"latest-date": "0001-08-15",
 						"min-%-asw": 0,
 						"max-%-asw": 150.0,
 						"max-3d-precip-sum": 2,
