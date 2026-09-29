@@ -90,7 +90,7 @@ def run_consumer(server=None, port=None):
     envs_received = 0
     no_of_envs_expected = None
 
-    outputs = ["Yield", "AnthesisDOY", "MaturityDOY", "StemElongationDOY"]
+    outputs = ["Yield", "StemElongationDOY", "AnthesisDOY", "MaturityDOY", "HarvestDOY"]
     values = defaultdict(
         lambda: defaultdict(
             lambda: defaultdict(list)
@@ -117,6 +117,7 @@ def run_consumer(server=None, port=None):
 
                 nuts3_region_id = custom_id["nuts3_region_id"]
 
+                env_values = defaultdict(dict)
                 for data in msg.get("data", []):
                     results = data.get("results", [])
                     for vals in results:
@@ -128,8 +129,23 @@ def run_consumer(server=None, port=None):
                                 continue
                             value = vals[variable]
                             if variable == "Yield":
-                                value *= 1.16 ## Conversion to fresh matter yields ##
-                            values[nuts3_region_id][year][variable].append(value)
+                                value /= 0.86 ## Conversion to fresh matter yields (14%) ##
+                            env_values[year][variable] = value
+
+                # set harvest doy for missing values
+                phenology_variables = ["StemElongationDOY", "AnthesisDOY", "MaturityDOY"]
+                for year, year_values in env_values.items():
+                    harvest_doy = year_values.get("HarvestDOY")
+                    for variable in phenology_variables:
+                        stage_doy = year_values.get(variable)
+                        if (
+                            (stage_doy is None or not np.isfinite(stage_doy))  
+                            and harvest_doy is not None
+                            and np.isfinite(harvest_doy)
+                        ):
+                            year_values[variable] = harvest_doy
+                    for variable, value in year_values.items():
+                        values[nuts3_region_id][year][variable].append(value)
 
             if no_of_envs_expected == envs_received and writer:
                 with open(path_to_out_file, "a") as _:
