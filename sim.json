@@ -26,12 +26,11 @@
 		"obj-outputs?": true,
 
 		"events" : [
-			"crop", [
+			"cereal-stem-elongation", [
 				["Year", "LAST"],
-				["Yield", "LAST"],
-				["NLeach", "SUM"]
+				["DOY|StemElongationDOY", "LAST"]
 			],
-			
+
 			"anthesis", [
 				["Year", "LAST"],
 				["DOY|AnthesisDOY", "LAST"]
@@ -44,13 +43,9 @@
 		
 			"Harvest", [
 				["Year", "LAST"],
+				["Yield", "LAST"],
 				["DOY|HarvestDOY", "LAST"]
-			],
-		
-			"cereal-stem-elongation", [
-				["Year", "LAST"],
-				["DOY|StemElongationDOY", "LAST"]
-			]
+			]		
 		]
 	},
 
