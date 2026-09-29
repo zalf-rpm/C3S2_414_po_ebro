@@ -46,7 +46,7 @@
 					},
 					{
 						"type": "AutomaticHarvest",
-						"latest-date": "0001-08-15",
+						"latest-date": "0001-10-05",
 						"min-%-asw": 0,
 						"max-%-asw": 150.0,
 						"max-3d-precip-sum": 2,
@@ -78,7 +78,7 @@
 					},
 					{
 						"type": "AutomaticHarvest",
-						"latest-date": "0001-08-15",
+						"latest-date": "0001-10-05",
 						"min-%-asw": 0,
 						"max-%-asw": 150.0,
 						"max-3d-precip-sum": 2,
@@ -116,7 +116,7 @@
 					},
 					{
 						"type": "AutomaticHarvest",
-						"latest-date": "0001-08-15",
+						"latest-date": "0001-11-05",
 						"min-%-asw": 0,
 						"max-%-asw": 150.0,
 						"max-3d-precip-sum": 2,
@@ -148,7 +148,7 @@
 					},
 					{
 						"type": "AutomaticHarvest",
-						"latest-date": "0001-08-15",
+						"latest-date": "0001-11-05",
 						"min-%-asw": 0,
 						"max-%-asw": 150.0,
 						"max-3d-precip-sum": 2,
