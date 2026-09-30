@@ -138,9 +138,6 @@ def run_calibration(config, setup_id):
         f"path_to_out={config['path_to_out']}",
     ]))
 
-    crop_code = crop_id.split("_")[0]
-    parameter_setting_file = setup["parameter-setting-file"]
-
     # Read observations
     obs_to_sim = {
         "yield": "Yield",
@@ -194,7 +191,7 @@ def run_calibration(config, setup_id):
 
     # read parameters which are to be calibrated
     params = []
-    with open(parameter_setting_file) as params_csv: # Define per crop #
+    with open(f"calibratethese/{parameter_setting_file}") as params_csv: # Define per crop #
         dialect = csv.Sniffer().sniff(params_csv.read(), delimiters=';,\t')
         params_csv.seek(0)
         reader = csv.reader(params_csv, dialect)

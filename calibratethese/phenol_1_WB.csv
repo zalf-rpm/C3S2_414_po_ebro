@@ -1,0 +1,2 @@
+name,position in array,low,high,step,optguess,minbound,maxbound,derived params
+StageTemperatureSumFactor,,0.5,2.0,,,,,

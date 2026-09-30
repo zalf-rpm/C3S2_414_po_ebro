@@ -1,0 +1,4 @@
+name,position in array,low,high,step,optguess,minbound,maxbound,derived params
+StageTemperatureSumFactor,,0.5,2.0,,,,,
+BaseDaylengthFactor,,0.0,1.5,,,,,
+DaylengthRequirementFactor,,0.0,1.5,,,,,
