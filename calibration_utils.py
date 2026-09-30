@@ -37,17 +37,16 @@ def update_parameter_values(ps, params):
                 param_val[position_in_array] = sampled_value
         else:
             # default target positions
-            indices = None
-            if pname == "StageTemperatureSum":
-                indices = range(0,6)
-            elif pname == "VernalisationRequirement":
-                indices = range(1,2)
+            if pname == "VernalisationRequirement":
+                indices = range(1, 2)
             elif pname == "BaseDaylength":
-                indices = range(2,4)
+                indices = range(2, 4)
             elif pname == "DaylengthRequirement":
-                indices = range(1,4)
-            elif pname == "SpecificLeafArea":
-                indices = range(0,6)
+                indices = range(1, 4)
+            elif isinstance(param_val, list):
+                indices = range(len(param_val))
+            else:
+                indices = None
 
             # check if the parameter is an array
             if indices is not None:
