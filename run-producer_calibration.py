@@ -364,11 +364,13 @@ def run_producer(server={"server": None, "port": None}):
                     "climate": ""
                 })
 
-                # get crop params
+                # get crop params, sowing date
                 ps = None
+                sowing_mmdd = None
                 for ws in env_template["cropRotation"][0]["worksteps"]:
                     if "Sowing" in ws["type"]:
                         ps = ws["crop"]["cropParams"]
+                        sowing_mmdd = ws["date"][-5:]
                         break
 
                 ps = update_parameter_values(ps, params)
@@ -594,7 +596,7 @@ def run_producer(server={"server": None, "port": None}):
                             "soil_id": soil_id,
                             "env_id": sent_env_count,
                             "nuts3_region_id": nuts3_region_id,
-                            #"is_sensitivity_analysis": is_sensitivity_analysis,
+                            "sowing_mmdd": sowing_mmdd,
                             #"param_name": p_name,
                             #"param_value": p_value,
                             "nodata": False

@@ -17,13 +17,14 @@
 
 import capnp
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, date
 import json
 import os
 from pathlib import Path
 import sys
 import zmq
 import numpy as np
+import calendar
 
 PATH_TO_REPO = Path(os.path.realpath(__file__)).parent
 PATH_TO_MAS_INFRASTRUCTURE_REPO = PATH_TO_REPO / "../mas-infrastructure"
@@ -116,6 +117,8 @@ def run_consumer(server=None, port=None):
                 # print("received result customId:", custom_id)
 
                 nuts3_region_id = custom_id["nuts3_region_id"]
+                sowing_mmdd = custom_id["sowing_mmdd"]
+                sowing_month, sowing_day = map(int, sowing_mmdd.split("-"))
 
                 env_values = defaultdict(dict)
                 for data in msg.get("data", []):
@@ -130,6 +133,13 @@ def run_consumer(server=None, port=None):
                             value = vals[variable]
                             if variable == "Yield":
                                 value /= 0.86 ## Conversion to fresh matter yields (14%) ##
+                            
+                            if variable == "StemElongationDOY":
+                                sowing_doy = date(year, sowing_month, sowing_day).timetuple().tm_yday
+                                if value >= sowing_doy:
+                                    days_in_year = 366 if calendar.isleap(year) else 365
+                                    value -= days_in_year
+                                    year += 1
                             env_values[year][variable] = value
 
                 # set harvest doy for missing values
