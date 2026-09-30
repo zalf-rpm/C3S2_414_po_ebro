@@ -168,8 +168,7 @@ def run_calibration(config, setup_id):
                 for i, year in enumerate(years, start=1):
                     text = row[i].strip()
                     value = (np.nan if not text or text.upper() == "NA" else float(text))
-                    if not np.isnan(value) and value < 0:
-                        value = np.nan
+
                     observations.append({"id": id,
                                          "year": year,
                                          "variable": variable,
@@ -216,8 +215,7 @@ def run_calibration(config, setup_id):
     with open(f"weights/Weights_{crop_code}_{region}.csv") as weights_csv: # Define per crop #
         dialect = csv.Sniffer().sniff(weights_csv.read(), delimiters=';,\t')
         weights_csv.seek(0)
-        reader = csv.reader(weights_csv, dialect)
-        next(reader, None)  # skip the header
+        reader = csv.DictReader(weights_csv, dialect=dialect)
         for row in reader:
             region_id = int(row["region_id"])
             count = float(row["count"])
