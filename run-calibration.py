@@ -219,7 +219,10 @@ def run_calibration(config, setup_id):
         reader = csv.reader(weights_csv, dialect)
         next(reader, None)  # skip the header
         for row in reader:
-            weights[int(row[2])] = float(row[4])
+            region_id = int(row["region_id"])
+            count = float(row["count"])
+            crop_fraction = float(row["weight"])
+            weights[region_id] = count * crop_fraction
     #print("weights:", weights)
 
     con_man = common.ConnectionManager()
