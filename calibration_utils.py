@@ -41,7 +41,7 @@ def update_parameter_values(ps, params):
             if pname == "StageTemperatureSum":
                 indices = range(0,6)
             elif pname == "VernalisationRequirement":
-                indices = range(0,6)
+                indices = range(1,2)
             elif pname == "BaseDaylength":
                 indices = range(2,4)
             elif pname == "DaylengthRequirement":
