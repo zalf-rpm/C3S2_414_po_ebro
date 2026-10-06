@@ -146,7 +146,12 @@ def run_producer(server={"server": None, "port": None}):
         "DW": "dw",
         "WB": "ba"
     }
+    crop_param_dirs = {
+        "DW": "crops/wheat",
+        "WB": "crops/barley"
+    }
     crop_grid_code = crop_grid_codes[crop_code]
+    crop_param_dir = crop_param_dirs[crop_code]
 
      # select paths
     paths = PATHS[config["mode"]]
@@ -355,6 +360,14 @@ def run_producer(server={"server": None, "port": None}):
                     crop_json["cropRotation"][2] = management_id
                     crop_json["CropParameters"]["__enable_vernalisation_factor_fix__"] = setup[
                     "use_vernalisation_fix"] if "use_vernalisation_fix" in setup else False
+
+                    # change initial cultivar
+                    cultivar_file = setup.get("initial_cultivar")
+                    if cultivar_file:
+                        crop_json["crops"][crop_id]["cropParams"]["cultivar"] = [
+                            "include-from-file",
+                            f"{crop_param_dir}/{cultivar_file}"
+                        ]
 
                 # create environment template from json templates
                 env_template = monica_io3.create_env_json_from_json_config({

@@ -377,7 +377,15 @@ def run_calibration(config, setup_id):
 
             crop_params = crop_json["crops"][crop_code]["cropParams"]
             species_file = include_base_path / crop_params["species"][1]
-            cultivar_file = include_base_path / crop_params["cultivar"][1]
+            initial_cultivar = setup.get("initial_cultivar")
+            if initial_cultivar:
+                crop_param_dirs = {
+                    "DW": "crops/wheat",
+                    "WB": "crops/barley",
+                }
+                cultivar_file = include_base_path / crop_param_dirs[crop_code] / initial_cultivar
+            else:
+                cultivar_file = include_base_path / crop_params["cultivar"][1]
 
             # read original parameter file
             with open(species_file) as _:
@@ -391,10 +399,10 @@ def run_calibration(config, setup_id):
             # update parameter values
             ps = update_parameter_values(ps, best_params)
 
-            # Write species, cultivar file
-            calibrated_species_files = f"{path_to_out_folder}/{run_name}_calibrated_species_{optimization}.json"
-            with open(calibrated_species_files, "w") as _:
-                json.dump(ps["species"], _, indent=2)
+            # # Write species, cultivar file
+            # calibrated_species_files = f"{path_to_out_folder}/{run_name}_calibrated_species_{optimization}.json"
+            # with open(calibrated_species_files, "w") as _:
+            #     json.dump(ps["species"], _, indent=2)
 
             calibrated_cultivar_files = f"{path_to_out_folder}/{run_name}_calibrated_cultivar_{optimization}.json"
             with open(calibrated_cultivar_files, "w") as _:
