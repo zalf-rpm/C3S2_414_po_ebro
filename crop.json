@@ -4,7 +4,7 @@
 			"is-winter-crop": true,
 			"cropParams": {
 				"species": ["include-from-file", "crops/wheat.json"],
-				"cultivar": ["include-from-file", "crops/wheat/durum-wheat.json"]
+				"cultivar": ["include-from-file", "crops/wheat/durum-wheat_base.json"]
 			},
 			"residueParams": ["include-from-file", "crop-residues/wheat.json"]
 		},
@@ -12,7 +12,7 @@
 			"is-winter-crop": true,
 			"cropParams": {
 				"species": ["include-from-file", "crops/barley.json"],
-				"cultivar": ["include-from-file", "crops/barley/winter-barley.json"]
+				"cultivar": ["include-from-file", "crops/barley/winter-barley_base.json"]
 			},
 			"residueParams": ["include-from-file", "crop-residues/barley.json"]
 		}		
