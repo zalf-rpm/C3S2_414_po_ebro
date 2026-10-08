@@ -219,6 +219,6 @@ __marimo__/
 
 # Local files (Shinwoo)
 rawdata/
-Rcodes/
+R_py_codes/
 out/
 *.pptx

@@ -71,4 +71,7 @@ def update_parameter_values(ps, params):
             if pname == "StageTemperatureSum" and is_factor:
                 ps["cultivar"]["BeginSensitivePhaseHeatStress"][0] *= sampled_value
                 ps["cultivar"]["EndSensitivePhaseHeatStress"][0] *= sampled_value
+
+                ps["cultivar"]["HeatSumIrrigationStart"] *= sampled_value
+                ps["cultivar"]["HeatSumIrrigationEnd"] *= sampled_value
     return ps

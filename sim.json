@@ -49,7 +49,7 @@
 		]
 	},
 
-	"UseSecondaryYields": false,
+	"UseSecondaryYields": true,
 	"NitrogenResponseOn": true,
 	"WaterDeficitResponseOn": true,
 	"EmergenceMoistureControlOn": false,
@@ -60,14 +60,10 @@
 	"NMinFertiliserPartition": ["include-from-file", "mineral-fertilisers/AN.json"],
 	"JulianDayAutomaticFertilising": 89,
 
-	"UseAutomaticIrrigation": false,
+	"UseAutomaticIrrigation": true,
 	"AutoIrrigationParams": {
-		"irrigationParameters": {
-			"nitrateConcentration": [0, "mg dm-3"]
-		},
-		"startDate": "1992-05-01",
 		"amount": [17, "mm"],
-		"trigger_if_nFC_below_%": [90, "%"],
+		"trigger_if_nFC_below_%": [50, "%"],
 		"_set_to_%nFC": [100, "%"],
 		"calc_nFC_until_depth_m": [0.3, "m"]
 	}
