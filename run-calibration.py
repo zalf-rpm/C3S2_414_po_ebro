@@ -399,14 +399,14 @@ def run_calibration(config, setup_id):
             # update parameter values
             ps = update_parameter_values(ps, best_params)
 
-            # # Write species, cultivar file
-            # calibrated_species_files = f"{path_to_out_folder}/{run_name}_calibrated_species_{optimization}.json"
-            # with open(calibrated_species_files, "w") as _:
-            #     json.dump(ps["species"], _, indent=2)
+            # Write species, cultivar file
+            calibrated_species_files = f"{path_to_out_folder}/{run_name}_calibrated_species_{optimization}.json"
+            with open(calibrated_species_files, "w") as _:
+                json.dump(ps["species"], _, indent=2, ensure_ascii=False)
 
             calibrated_cultivar_files = f"{path_to_out_folder}/{run_name}_calibrated_cultivar_{optimization}.json"
             with open(calibrated_cultivar_files, "w") as _:
-                json.dump(ps["cultivar"], _, indent=2)
+                json.dump(ps["cultivar"], _, indent=2, ensure_ascii=False)
 
         if sampler.status.optimization_direction == "minimize" or sampler.status.optimization_direction == "grid":
             best_params = {
